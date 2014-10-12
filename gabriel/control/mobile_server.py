@@ -62,6 +62,7 @@ class MobileSensorHandler(SocketServer.StreamRequestHandler, object):
         self.stop_queue = multiprocessing.Queue()
 
     def _recv_all(self, recv_size):
+        
         data = ''
         while len(data) < recv_size:
             tmp_data = self.request.recv(recv_size - len(data))
@@ -131,6 +132,7 @@ class MobileVideoHandler(MobileSensorHandler):
         return "Mobile Video Server"
 
     def _handle_input_data(self):
+        import pdb; pdb.set_trace();
         header_size = struct.unpack("!I", self._recv_all(4))[0]
         img_size = struct.unpack("!I", self._recv_all(4))[0]
         header_data = self._recv_all(header_size)
@@ -224,6 +226,7 @@ class MobileAccHandler(MobileSensorHandler):
 
 
 class MobileResultHandler(MobileSensorHandler):
+
     def setup(self):
         super(MobileResultHandler, self).setup()
 

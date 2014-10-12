@@ -110,6 +110,7 @@ class SensorHandler(SocketServer.StreamRequestHandler, object):
 
 class VideoSensorHandler(SensorHandler):
     def setup(self):
+       # import pdp; pdp.set_trace();
         super(VideoSensorHandler, self).setup()
         self.data_queue = Queue.Queue(Const.MAX_FRAME_SIZE)
         mobile_server.image_queue_list.append(self.data_queue)

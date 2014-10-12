@@ -35,7 +35,7 @@ class CustomService(object):
         return self.content
 
 
-def get_ip(iface = 'eth0'):
+def get_ip(iface = 'wlan0'):
     import socket
     import struct
     import fcntl
@@ -140,7 +140,7 @@ class ManageService(Resource):
 class GabrielInfo(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('task', type=str)
-    ip_addr = get_ip(iface="eth0")
+    ip_addr = get_ip(iface="wlan0")
     service_info = {
             ServiceMeta.RESULT_RETURN_SERVER_LIST: list(),
             ServiceMeta.VIDEO_TCP_STREAMING_ADDRESS: str(ip_addr),
