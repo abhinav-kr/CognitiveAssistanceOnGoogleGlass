@@ -284,6 +284,7 @@ class AppProxyThread(threading.Thread):
             self.frameid = new_frameid
 
             result = self.handle(header, data)
+	    import pdb; pdb.set_trace()
             if self.app_id is not None:
                 header[Protocol_client.OFFLOADING_ENGINE_NAME_KEY] = self.app_id
             if result is not None:

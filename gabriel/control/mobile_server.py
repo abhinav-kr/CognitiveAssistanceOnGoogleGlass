@@ -132,7 +132,7 @@ class MobileVideoHandler(MobileSensorHandler):
         return "Mobile Video Server"
 
     def _handle_input_data(self):
-        import pdb; pdb.set_trace();
+        #import pdb; pdb.set_trace();
         header_size = struct.unpack("!I", self._recv_all(4))[0]
         img_size = struct.unpack("!I", self._recv_all(4))[0]
         header_data = self._recv_all(header_size)
