@@ -35,7 +35,8 @@ class Protocol_application(object):
     JSON_VALUE_SENSOR_TYPE_AUDIO = "wave"
 
 class Video_application(object):
-    JSON_CURRENT_VM_COUNT = "current_vm_count"
+    JSON_CURRENT_VM_COUNT = "total_vm_count"
+    JSON_THREAD_ID = "thread_id"
 
 class Protocol_measurement(object):
     JSON_KEY_CONTROL_SENT_TIME = "control_sent_time"
