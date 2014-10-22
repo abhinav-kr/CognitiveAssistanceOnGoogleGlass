@@ -301,6 +301,7 @@ class MobileResultHandler(MobileSensorHandler):
             # process header a little bit since we like to differenciate
             # frame id that comes from an application with the frame id for
             # the token bucket.
+	    #import pdb; pdb.set_trace()
             packet = struct.pack("!I%ds" % len(result_msg),
                     len(result_msg),
                     result_msg)

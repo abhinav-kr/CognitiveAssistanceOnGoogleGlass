@@ -19,6 +19,7 @@
 #
 
 from gabriel.common.protocol import Protocol_application
+from gabriel.common.protocol import Video_application
 from gabriel.common.protocol import Protocol_client
 from gabriel.common import log as logging
 from gabriel.control import mobile_server
@@ -37,7 +38,7 @@ import threading
 
 
 LOG = logging.getLogger(__name__)
-
+cog_eng_count = 0;
 
 class AppServerError(Exception):
     pass
@@ -69,7 +70,9 @@ class SensorHandler(SocketServer.StreamRequestHandler, object):
 
     def handle(self):
         try:
-            LOG.info("Offloading engine is connected")
+            LOG.info("Offloading engine is connected")	               
+            global cog_eng_count
+            cog_eng_count=cog_eng_count+1
             socket_fd = self.request.fileno()
             stopfd = self.stop_queue._reader.fileno()
             input_list = [socket_fd, stopfd]
@@ -117,13 +120,21 @@ class VideoSensorHandler(SensorHandler):
 
     def _handle_sensor_stream(self):
         try:
+	    #import pdb; pdb.set_trace();
             (header, jpeg_data) = self.data_queue.get(timeout=0.001)
             header = json.loads(header)
+	    import pdb; pdb.set_trace()
+            global cog_eng_count
             header.update({
                 Protocol_application.JSON_KEY_SENSOR_TYPE:
                         Protocol_application.JSON_VALUE_SENSOR_TYPE_JPEG,
                 })
+            header.update({
+                Video_application.JSON_CURRENT_VM_COUNT:
+                        cog_eng_count,
+                })
             json_header = json.dumps(header)
+	    #import pdb; pdb.set_trace();
             packet = struct.pack("!II%ds%ds" % (len(json_header), len(jpeg_data)), 
                     len(json_header),
                     len(jpeg_data),

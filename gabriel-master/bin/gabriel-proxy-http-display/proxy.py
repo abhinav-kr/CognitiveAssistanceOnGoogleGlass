@@ -57,7 +57,7 @@ class DummyVideoApp(AppProxyThread):
     def handle(self, header, data,):
 	global share_queue
 	global session
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
     
         path_of_image = "/home/ivashish/tempImage.jpg"
         with open(path_of_image, 'wb') as file:
@@ -170,7 +170,7 @@ if __name__ == "__main__":
 
     # dummy video app
     image_queue = Queue.Queue(1)
-    video_ip ='10.2.12.3'
+    video_ip ='0.0.0.0'
     video_client = AppProxyStreamingClient((video_ip, video_port), image_queue)
     video_client.start()
     video_client.isDaemon = True
@@ -178,10 +178,10 @@ if __name__ == "__main__":
     app_thread.start()
     app_thread.isDaemon = True
 
-    #http_server = ThreadedHTTPServer(('0.0.0.0', 7070), MJPEGStreamHandler)
-    #http_server_thread = threading.Thread(target=http_server.serve_forever)
-    #http_server_thread.daemon = True
-    #http_server_thread.start()
+    http_server = ThreadedHTTPServer(('0.0.0.0', 7070), MJPEGStreamHandler)
+    http_server_thread = threading.Thread(target=http_server.serve_forever)
+    http_server_thread.daemon = True
+    http_server_thread.start()
 
     # result pub/sub
     result_pub = ResultpublishClient(return_addresses, output_queue_list)

@@ -34,6 +34,9 @@ class Protocol_application(object):
     JSON_VALUE_SENSOR_TYPE_GPS = "gps"
     JSON_VALUE_SENSOR_TYPE_AUDIO = "wave"
 
+class Video_application(object):
+    JSON_CURRENT_VM_COUNT = "current_vm_count"
+
 class Protocol_measurement(object):
     JSON_KEY_CONTROL_SENT_TIME = "control_sent_time"
     JSON_KEY_APP_RECV_TIME = "app_recv_time"
