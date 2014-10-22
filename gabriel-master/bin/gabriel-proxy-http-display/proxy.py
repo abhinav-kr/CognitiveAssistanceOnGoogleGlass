@@ -57,14 +57,22 @@ class DummyVideoApp(AppProxyThread):
     def handle(self, header, data,):
 	global share_queue
 	global session
-        import pdb; pdb.set_trace()
+	total_vm = header['total_vm_count']; 
+	vm_id =  header['thread_id'];
     
         path_of_image = "/home/ivashish/tempImage.jpg"
         with open(path_of_image, 'wb') as file:
 	        file.write(data)
+	set
         
+	set_arg1 = "total_vm="+str(total_vm)+";"
+	set_arg2 = "vm_id="+str(vm_id)+";"
+
 	mlab.run_code("addpath('/home/ivashish/exemplarsvm-master')")
-	results = mlab.run_code("detect_object_2('/home/ivashish/tempImage.jpg')")
+	#results = mlab.run_func('detect_object_2.m',{'image_path':'/home/ivashish/tempImage.jpg','total_vm':total_vm,'vm_id':vm_id});
+	mlab.run_code(set_arg1);
+	mlab.run_code(set_arg2);
+	results = mlab.run_code("detect_object_2('/home/ivashish/tempImage.jpg',total_vm,vm_id)");
 	ans = mlab.get_variable('ans')
 
 	#import pdb; pdb.set_trace();	
