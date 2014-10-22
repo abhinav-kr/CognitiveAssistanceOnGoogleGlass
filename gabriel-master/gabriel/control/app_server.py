@@ -38,7 +38,10 @@ import threading
 
 
 LOG = logging.getLogger(__name__)
+
+vm_state = dict();
 cog_eng_count = 0;
+thread_id_counter =0;
 
 class AppServerError(Exception):
     pass
@@ -72,6 +75,11 @@ class SensorHandler(SocketServer.StreamRequestHandler, object):
         try:
             LOG.info("Offloading engine is connected")	               
             global cog_eng_count
+            global vm_state
+            global thread_id_counter
+            thread_name = threading.current_thread();
+            vm_state[thread_name] = thread_id_counter;
+            thread_id_counter = thread_id_counter +1;
             cog_eng_count=cog_eng_count+1
             socket_fd = self.request.fileno()
             stopfd = self.stop_queue._reader.fileno()
@@ -99,6 +107,12 @@ class SensorHandler(SocketServer.StreamRequestHandler, object):
             LOG.debug(traceback.format_exc())
             LOG.debug("%s" % str(e))
 
+        global vm_state
+        global cog_eng_count
+        thrad_name = threading.current_thread()
+        del vm_state[thrad_name]
+        cog_eng_count = cog_eng_count -1
+
         if self.connection is not None:
             self.connection.close()
             self.connection = None
@@ -108,6 +122,7 @@ class SensorHandler(SocketServer.StreamRequestHandler, object):
         LOG.info("%s\tterminate thread" % str(self))
 
     def terminate(self):
+
         self.stop_queue.put("terminate\n")
 
 
@@ -123,8 +138,11 @@ class VideoSensorHandler(SensorHandler):
 	    #import pdb; pdb.set_trace();
             (header, jpeg_data) = self.data_queue.get(timeout=0.001)
             header = json.loads(header)
-	    import pdb; pdb.set_trace()
             global cog_eng_count
+            global vm_state
+            thread_name = threading.current_thread()
+            thrad_id = vm_state[thread_name] 
+
             header.update({
                 Protocol_application.JSON_KEY_SENSOR_TYPE:
                         Protocol_application.JSON_VALUE_SENSOR_TYPE_JPEG,
@@ -133,6 +151,11 @@ class VideoSensorHandler(SensorHandler):
                 Video_application.JSON_CURRENT_VM_COUNT:
                         cog_eng_count,
                 })
+            header.update({
+                Video_application.JSON_CURRENT_VM_COUNT:
+                        thrad_id,
+                })
+
             json_header = json.dumps(header)
 	    #import pdb; pdb.set_trace();
             packet = struct.pack("!II%ds%ds" % (len(json_header), len(jpeg_data)), 
@@ -146,6 +169,7 @@ class VideoSensorHandler(SensorHandler):
             pass
 
     def terminate(self):
+        
         LOG.info("Video Offloading Engine is disconnected")
         mobile_server.image_queue_list.remove(self.data_queue)
         super(VideoSensorHandler, self).setup()
