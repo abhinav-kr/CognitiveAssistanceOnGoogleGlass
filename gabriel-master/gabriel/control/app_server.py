@@ -141,7 +141,7 @@ class VideoSensorHandler(SensorHandler):
             global cog_eng_count
             global vm_state
             thread_name = threading.current_thread()
-            thrad_id = vm_state[thread_name] 
+            thread_id = vm_state[thread_name] 
 
             header.update({
                 Protocol_application.JSON_KEY_SENSOR_TYPE:
@@ -152,8 +152,8 @@ class VideoSensorHandler(SensorHandler):
                         cog_eng_count,
                 })
             header.update({
-                Video_application.JSON_CURRENT_VM_COUNT:
-                        thrad_id,
+                Video_application.JSON_THREAD_ID:
+                        thread_id,
                 })
 
             json_header = json.dumps(header)
