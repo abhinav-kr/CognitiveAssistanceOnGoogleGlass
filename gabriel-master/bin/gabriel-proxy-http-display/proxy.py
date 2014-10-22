@@ -32,6 +32,7 @@ from os import sep
 from BaseHTTPServer import BaseHTTPRequestHandler
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import HTTPServer
+from random import randint
 
 
 import os
@@ -49,11 +50,11 @@ share_queue = Queue.Queue();
 
 
 class DummyVideoApp(AppProxyThread):
-    def __init__(self, data_queue, output_queue_list):
+    def __init__(self, data_queue, output_queue_list,mlab):
 	AppProxyThread.__init__(self, data_queue, output_queue_list)
-	#self.session = session
+	self.mlab = mlab
 
-    def handle(self, header, data):
+    def handle(self, header, data,):
 	global share_queue
 	global session
         #import pdb; pdb.set_trace()
@@ -62,12 +63,11 @@ class DummyVideoApp(AppProxyThread):
         with open(path_of_image, 'wb') as file:
 	        file.write(data)
         
-	mlab = Matlab('/home/ivashish/Matlab/bin/matlab');
-	mlab.start();
 	mlab.run_code("addpath('/home/ivashish/exemplarsvm-master')")
-	results = mlab.run_code("detect_object('/home/ivashish/tempImage.jpg')")
+	results = mlab.run_code("detect_object_2('/home/ivashish/tempImage.jpg')")
 	ans = mlab.get_variable('ans')
-	
+
+	#import pdb; pdb.set_trace();	
 	'''
 	session = MatlabSession(matlab_root='/home/ivashish/Matlab')
 	self.session.putvalue('x',3);
@@ -82,7 +82,12 @@ class DummyVideoApp(AppProxyThread):
 	#import pdb; pdb.set_trace()       
         
         share_queue.put_nowait(data)
-        ret = ans
+	
+        if not ans:
+		ret = '';
+	else:
+		ret = 'bus found';
+
         return ret
 
 
@@ -160,21 +165,23 @@ if __name__ == "__main__":
     return_addresses = service_list.get(SERVICE_META.RESULT_RETURN_SERVER_LIST)
 
     #session = pymatlab.session_factory();
+    mlab = Matlab('/home/ivashish/Matlab/bin/matlab');
+    mlab.start();
 
     # dummy video app
     image_queue = Queue.Queue(1)
-    video_ip ='0.0.0.0'
+    video_ip ='10.2.12.3'
     video_client = AppProxyStreamingClient((video_ip, video_port), image_queue)
     video_client.start()
     video_client.isDaemon = True
-    app_thread = DummyVideoApp(image_queue, output_queue_list)
+    app_thread = DummyVideoApp(image_queue, output_queue_list,mlab)
     app_thread.start()
     app_thread.isDaemon = True
 
-    http_server = ThreadedHTTPServer(('0.0.0.0', 7070), MJPEGStreamHandler)
-    http_server_thread = threading.Thread(target=http_server.serve_forever)
-    http_server_thread.daemon = True
-    http_server_thread.start()
+    #http_server = ThreadedHTTPServer(('0.0.0.0', 7070), MJPEGStreamHandler)
+    #http_server_thread = threading.Thread(target=http_server.serve_forever)
+    #http_server_thread.daemon = True
+    #http_server_thread.start()
 
     # result pub/sub
     result_pub = ResultpublishClient(return_addresses, output_queue_list)
