@@ -170,7 +170,7 @@ if __name__ == "__main__":
 
     # dummy video app
     image_queue = Queue.Queue(1)
-    video_ip ='0.0.0.0'
+    video_ip ='10.2.12.3'
     video_client = AppProxyStreamingClient((video_ip, video_port), image_queue)
     video_client.start()
     video_client.isDaemon = True

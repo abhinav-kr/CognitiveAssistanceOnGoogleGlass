@@ -326,7 +326,7 @@ class ResultpublishClient(threading.Thread):
                 sock.settimeout(1)
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-		addr ='0.0.0.0';
+		addr ='10.2.12.3';
                 sock.connect((addr, port))
                 sock.settimeout(original_timeout)
                 # update
