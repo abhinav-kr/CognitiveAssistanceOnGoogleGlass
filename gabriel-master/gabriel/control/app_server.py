@@ -21,10 +21,13 @@
 from gabriel.common.protocol import Protocol_application
 from gabriel.common.protocol import Video_application
 from gabriel.common.protocol import Protocol_client
+from gabriel.control.thread_state import Thread_State
 from gabriel.common import log as logging
 from gabriel.control import mobile_server
 from gabriel.common.config import Const as Const
+from gabriel.control.soft_state import soft_state
 
+import time
 import Queue
 import sys
 import json
@@ -38,10 +41,6 @@ import threading
 
 
 LOG = logging.getLogger(__name__)
-
-vm_state = dict();
-cog_eng_count = 0;
-thread_id_counter =0;
 
 class AppServerError(Exception):
     pass
@@ -74,13 +73,12 @@ class SensorHandler(SocketServer.StreamRequestHandler, object):
     def handle(self):
         try:
             LOG.info("Offloading engine is connected")	               
-            global cog_eng_count
-            global vm_state
-            global thread_id_counter
-            thread_name = threading.current_thread();
-            vm_state[thread_name] = thread_id_counter;
-            thread_id_counter = thread_id_counter +1;
-            cog_eng_count=cog_eng_count+1
+            global soft_state
+            #import pdb; pdb.set_trace();
+            thread_name = threading.current_thread().name;
+            soft_state.vm_state_list.append(Thread_State(thread_name));
+            
+            
             socket_fd = self.request.fileno()
             stopfd = self.stop_queue._reader.fileno()
             input_list = [socket_fd, stopfd]
@@ -107,11 +105,13 @@ class SensorHandler(SocketServer.StreamRequestHandler, object):
             LOG.debug(traceback.format_exc())
             LOG.debug("%s" % str(e))
 
-        global vm_state
-        global cog_eng_count
-        thrad_name = threading.current_thread()
-        del vm_state[thrad_name]
-        cog_eng_count = cog_eng_count -1
+        #import pdb; pdb.set_trace();
+        global soft_state
+        
+        thread_name = threading.current_thread().name
+        index = soft_state.getIndexForHandler(thread_name);
+
+        soft_state.vm_state_list.pop(index)
 
         if self.connection is not None:
             self.connection.close()
@@ -135,13 +135,22 @@ class VideoSensorHandler(SensorHandler):
 
     def _handle_sensor_stream(self):
         try:
-	    #import pdb; pdb.set_trace();
+	    
             (header, jpeg_data) = self.data_queue.get(timeout=0.001)
             header = json.loads(header)
-            global cog_eng_count
-            global vm_state
-            thread_name = threading.current_thread()
-            thread_id = vm_state[thread_name] 
+            global soft_state
+            #import pdb; pdb.set_trace();    
+
+            thread_name = threading.current_thread().name
+            
+            thread_id = soft_state.getIndexForHandler(thread_name);
+
+            #getting current time in ms
+            millis = int(round(time.time() * 1000))
+            header.update({
+                Video_application.JSON_APP_SENT_TIME:
+                        millis,
+                })
 
             header.update({
                 Protocol_application.JSON_KEY_SENSOR_TYPE:
@@ -149,11 +158,15 @@ class VideoSensorHandler(SensorHandler):
                 })
             header.update({
                 Video_application.JSON_CURRENT_VM_COUNT:
-                        cog_eng_count,
+                        len(soft_state.vm_state_list),
                 })
             header.update({
                 Video_application.JSON_THREAD_ID:
                         thread_id,
+                })
+            header.update({
+                Video_application.JSON_THREAD_NAME:
+                        thread_name,
                 })
 
             json_header = json.dumps(header)

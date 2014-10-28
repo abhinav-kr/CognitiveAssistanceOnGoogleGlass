@@ -32,11 +32,13 @@ import socket
 import multiprocessing
 
 from gabriel.common import log as logging
+from gabriel.common.protocol import Video_application
+from gabriel.control.thread_state import Thread_State
 from gabriel.common.config import Const as Const
 from gabriel.common.config import DEBUG
 from gabriel.common.protocol import Protocol_client
 from gabriel.common.protocol import Protocol_measurement
-
+from gabriel.control.soft_state import soft_state
 
 LOG = logging.getLogger(__name__)
 image_queue_list = list()
@@ -301,7 +303,31 @@ class MobileResultHandler(MobileSensorHandler):
             # process header a little bit since we like to differenciate
             # frame id that comes from an application with the frame id for
             # the token bucket.
-	    #import pdb; pdb.set_trace()
+	        
+
+            #import pdb; pdb.set_trace()
+            global soft_state
+            header = json.loads(result_msg)
+            app_recv_time = int(round(time.time() * 1000))
+            app_sent_time = header.get(Video_application.JSON_APP_SENT_TIME)
+
+            odt = app_recv_time - app_sent_time
+            thread_name = header[Video_application.JSON_THREAD_NAME]
+
+            soft_state.updateODT(thread_name,odt)
+
+            header.update({
+                Video_application.JSON_OBJECT_DETECTION_TIME:
+                        odt,
+                })
+
+            header.update({
+                Video_application.JSON_APP_RCV_TIME:
+                        odt,
+                })
+
+            result_msg = json.dumps(header)
+
             packet = struct.pack("!I%ds" % len(result_msg),
                     len(result_msg),
                     result_msg)

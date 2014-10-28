@@ -37,6 +37,11 @@ class Protocol_application(object):
 class Video_application(object):
     JSON_CURRENT_VM_COUNT = "total_vm_count"
     JSON_THREAD_ID = "thread_id"
+    JSON_THREAD_NAME ="thread_name"
+    JSON_APP_SENT_TIME = "app_sent_time"
+    JSON_APP_RCV_TIME = "app_rcv_time"
+    JSON_OBJECT_DETECTION_TIME = "odt"
+
 
 class Protocol_measurement(object):
     JSON_KEY_CONTROL_SENT_TIME = "control_sent_time"
