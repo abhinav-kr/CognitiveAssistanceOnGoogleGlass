@@ -21,7 +21,6 @@
 from gabriel.common.protocol import Protocol_application
 from gabriel.common.protocol import Video_application
 from gabriel.common.protocol import Protocol_client
-from gabriel.control.thread_state import Thread_State
 from gabriel.common import log as logging
 from gabriel.control import mobile_server
 from gabriel.common.config import Const as Const
@@ -74,10 +73,9 @@ class SensorHandler(SocketServer.StreamRequestHandler, object):
         try:
             LOG.info("Offloading engine is connected")	               
             global soft_state
-            #import pdb; pdb.set_trace();
-            thread_name = threading.current_thread().name;
-            soft_state.vm_state_list.append(Thread_State(thread_name));
             
+            thread_name = threading.current_thread().name;
+            soft_state.addHandler(thread_name);
             
             socket_fd = self.request.fileno()
             stopfd = self.stop_queue._reader.fileno()
@@ -109,9 +107,7 @@ class SensorHandler(SocketServer.StreamRequestHandler, object):
         global soft_state
         
         thread_name = threading.current_thread().name
-        index = soft_state.getIndexForHandler(thread_name);
-
-        soft_state.vm_state_list.pop(index)
+        soft_state.removehandler(thread_name)
 
         if self.connection is not None:
             self.connection.close()
@@ -142,11 +138,21 @@ class VideoSensorHandler(SensorHandler):
             #import pdb; pdb.set_trace();    
 
             thread_name = threading.current_thread().name
-            
-            thread_id = soft_state.getIndexForHandler(thread_name);
+
+            frame_id = header[Protocol_client.FRAME_MESSAGE_KEY]    
+            vm_schedule = soft_state.getSchedule(thread_name,frame_id);
 
             #getting current time in ms
             millis = int(round(time.time() * 1000))
+            
+            header.update({
+                Video_application.JSON_VM_SLICE:
+                        vm_schedule.slice_perc,
+                })
+            header.update({
+                Video_application.JSON_VM_OFFSET:
+                        vm_schedule.offset_perc,
+                })
             header.update({
                 Video_application.JSON_APP_SENT_TIME:
                         millis,
@@ -156,14 +162,7 @@ class VideoSensorHandler(SensorHandler):
                 Protocol_application.JSON_KEY_SENSOR_TYPE:
                         Protocol_application.JSON_VALUE_SENSOR_TYPE_JPEG,
                 })
-            header.update({
-                Video_application.JSON_CURRENT_VM_COUNT:
-                        len(soft_state.vm_state_list),
-                })
-            header.update({
-                Video_application.JSON_THREAD_ID:
-                        thread_id,
-                })
+            
             header.update({
                 Video_application.JSON_THREAD_NAME:
                         thread_name,

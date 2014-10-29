@@ -38,6 +38,8 @@ class Video_application(object):
     JSON_CURRENT_VM_COUNT = "total_vm_count"
     JSON_THREAD_ID = "thread_id"
     JSON_THREAD_NAME ="thread_name"
+    JSON_VM_SLICE="vm_slice"
+    JSON_VM_OFFSET="vm_offset"
     JSON_APP_SENT_TIME = "app_sent_time"
     JSON_APP_RCV_TIME = "app_rcv_time"
     JSON_OBJECT_DETECTION_TIME = "odt"

@@ -313,18 +313,15 @@ class MobileResultHandler(MobileSensorHandler):
 
             odt = app_recv_time - app_sent_time
             thread_name = header[Video_application.JSON_THREAD_NAME]
+            frame_id = header[Protocol_client.FRAME_MESSAGE_KEY]
 
-            soft_state.updateODT(thread_name,odt)
+            soft_state.updateODT(thread_name,frame_id,odt)
 
             header.update({
                 Video_application.JSON_OBJECT_DETECTION_TIME:
                         odt,
                 })
 
-            header.update({
-                Video_application.JSON_APP_RCV_TIME:
-                        odt,
-                })
 
             result_msg = json.dumps(header)
 
