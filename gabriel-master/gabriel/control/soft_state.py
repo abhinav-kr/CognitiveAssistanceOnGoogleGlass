@@ -105,8 +105,11 @@ class Soft_State:
    def calculateExpectedODT(self):
    	expected_odt = 0
    	
+   	index =0;
    	for ele in self.vm_state_list :
-   		expected_odt = expected_odt + (0.5 * ele.last_odt)
+   		vm_schedule = self.curr_schedule.getScheduleForId(index);
+   		expected_odt = expected_odt + ( (vm_schedule.slice_perc/100.0)* ele.last_odt)
+   		index+=1
    	
    	LOG.info("Calculation is triggered %s" % str(expected_odt));
    	return expected_odt
@@ -152,11 +155,12 @@ class Soft_State:
 
 
    def createNewSchedule(self,new_schedule,curr_schedule):
+   		
    		vm_count = len(self.vm_state_list)
    		offset = 0
    		slice_perc =0 
    		for x in xrange(0,vm_count) :
-   			vm_schedule = curr_schedule.getScheduleForId(x)
+   			vm_schedule = self.curr_schedule.getScheduleForId(x)
 
    			if x == self.thread_under_opt :
 
@@ -189,7 +193,7 @@ class Soft_State:
 
    def changeThreadUnderOpt(self):
    		self.thread_under_opt = self.thread_under_opt +1
-
+   		vm_count = len(self.vm_state_list)
    		if self.thread_under_opt == vm_count-1 :
    			self.state_stable = True
 
@@ -199,6 +203,7 @@ class Soft_State:
    	self.countdown.clear()
    	LOG.info("Calculation is triggered");
    	
+   	import pdb; pdb.set_trace()
    	#calculate the expected value based on current set of odt
    	expected_odt =self.calculateExpectedODT();
    	
@@ -211,6 +216,7 @@ class Soft_State:
    		self.createNewSchedule(new_schedule,self.new_schedule)
    	else :
    		self.createNewSchedule(new_schedule,self.curr_schedule);
+   		self.curr_expected_odt = expected_odt
 
    	self.new_schedule = new_schedule
 
@@ -222,7 +228,7 @@ class Soft_State:
 	   			self.countdown[thread_name]=1
 
 	   			if len(self.countdown) == len(self.vm_state_list) :
-	   				if self.state_stable == False:
+	   				if (self.state_stable == False) and (len(self.vm_state_list) >1 ):
 	   					self.triggerScheduleCalculation()
    			
 
