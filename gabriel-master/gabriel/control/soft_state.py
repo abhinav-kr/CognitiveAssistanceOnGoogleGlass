@@ -212,11 +212,10 @@ class Soft_State:
 
    def adjustFidelity(self):
       #calculate the expected value based on current set of odt
-      new_expected_odt =self.calculateExpectedODT();
-
-      if new_expected_odt > 500 :
+	new_expected_odt =self.calculateExpectedODT();
+	if new_expected_odt > 500 :
          self.decreaseFidelity()
-      else :
+	else:
          self.increaseFidelity()
 
    	
@@ -252,8 +251,8 @@ class Soft_State:
 	   			if len(self.countdown) == len(self.vm_state_list) :
 	   				if (self.state_stable == False) and (len(self.vm_state_list) >1 ):
 	   					self.triggerScheduleCalculation()
-                  else :
-                     self.adjustFidelity()
+                 		else :
+		                     	self.adjustFidelity()
    			
 
    def getSchedule(self,vm_name,frame_id) :

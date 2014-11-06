@@ -59,7 +59,7 @@ class DummyVideoApp(AppProxyThread):
 	global session
 	offset = header['vm_offset']; 
 	slice_perc =  header['vm_slice'];
-    fidelity =  header['cog_eng_fidelity'];
+	fidelity =  header['cog_eng_fidelity'];
     
         path_of_image = "/home/ivashish/tempImage.jpg"
         with open(path_of_image, 'wb') as file:
@@ -68,7 +68,7 @@ class DummyVideoApp(AppProxyThread):
         
 	set_arg1 = "offset="+str(offset)+";"
 	set_arg2 = "slice="+str(slice_perc)+";"
-    set_arg3 = "fidelity="+str(fidelity)+";"
+	set_arg3 = "fidelity="+str(fidelity)+";"
 
 	mlab.run_code("addpath('/home/ivashish/exemplarsvm-master')")
 	#results = mlab.run_func('detect_object_2.m',{'image_path':'/home/ivashish/tempImage.jpg','total_vm':total_vm,'vm_id':vm_id});
