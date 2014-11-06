@@ -201,7 +201,7 @@ class Soft_State:
 
 
    def decreaseFidelity(self):
-         if self.fidelity >= 5 :
+         if self.fidelity > 5 :
             self.fidelity-=1
 
    def increaseFidelity(self):
@@ -250,7 +250,7 @@ class Soft_State:
 	   			if len(self.countdown) == len(self.vm_state_list) :
 	   				if (self.state_stable == False) and (len(self.vm_state_list) >1 ):
 	   					self.triggerScheduleCalculation()
-                 		else :
+                 		elif self.state_stable == True:
 		                     	self.adjustFidelity()
    			
 
