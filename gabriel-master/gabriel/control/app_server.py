@@ -141,6 +141,7 @@ class VideoSensorHandler(SensorHandler):
 
             frame_id = header[Protocol_client.FRAME_MESSAGE_KEY]    
             vm_schedule = soft_state.getSchedule(thread_name,frame_id);
+            fidelity = soft_state.fidelity;
 
             #getting current time in ms
             millis = int(round(time.time() * 1000))
@@ -150,9 +151,15 @@ class VideoSensorHandler(SensorHandler):
                         vm_schedule.slice_perc,
                 })
             header.update({
+                Video_application.CONG_ENGINE_FIDELITY:
+                        fidelity,
+                })
+
+            header.update({
                 Video_application.JSON_VM_OFFSET:
                         vm_schedule.offset_perc,
                 })
+
             header.update({
                 Video_application.JSON_APP_SENT_TIME:
                         millis,

@@ -127,7 +127,7 @@ class Soft_State:
    			if x == self.thread_under_opt :
 
    				#getting slice_perc to the previous state
-   				k = 3* (vm_count - 1 - self.thread_under_opt)
+   				k = 4* (vm_count - 1 - self.thread_under_opt)
    				slice_perc = vm_schedule.slice_perc + k
    				
    				vm_name = vm_schedule.thread_name
@@ -137,11 +137,11 @@ class Soft_State:
    				new_schedule.addVMSchedule( VM_Schedule(vm_name,offset_perc,slice_perc) )
    			elif x > self.thread_under_opt :
    				#getting slice_perc to the previous state
-   				slice_perc = vm_schedule.slice_perc - 3
+   				slice_perc = vm_schedule.slice_perc - 4
    				
    				vm_name = vm_schedule.thread_name
 
-   				s = vm_count - ( x- self.thread_under_opt)
+   				s = 4 *(vm_count - ( x- self.thread_under_opt))
    				offset_perc = vm_schedule.offset_perc +s
    				
    				#restored value
@@ -167,7 +167,7 @@ class Soft_State:
    			if x == self.thread_under_opt :
 
    				#getting slice_perc to the previous state
-   				k = 3*(vm_count - 1 - self.thread_under_opt)
+   				k = 4*(vm_count - 1 - self.thread_under_opt)
    				slice_perc = vm_schedule.slice_perc - k
    				vm_name = vm_schedule.thread_name
    				#restored value
@@ -175,7 +175,7 @@ class Soft_State:
 
    			elif x > self.thread_under_opt :
    				#getting slice_perc to the previous state
-   				slice_perc = vm_schedule.slice_perc + 3
+   				slice_perc = vm_schedule.slice_perc + 4
    				vm_name = vm_schedule.thread_name
 
    				

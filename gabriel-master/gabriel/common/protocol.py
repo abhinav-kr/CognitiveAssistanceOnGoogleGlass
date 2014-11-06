@@ -35,6 +35,7 @@ class Protocol_application(object):
     JSON_VALUE_SENSOR_TYPE_AUDIO = "wave"
 
 class Video_application(object):
+    CONG_ENGINE_FIDELITY = "cog_eng_fidelity"
     JSON_CURRENT_VM_COUNT = "total_vm_count"
     JSON_THREAD_ID = "thread_id"
     JSON_THREAD_NAME ="thread_name"

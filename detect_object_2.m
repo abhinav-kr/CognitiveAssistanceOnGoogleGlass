@@ -1,4 +1,4 @@
-function goodBoxesNonDups = detect_object( image_path, offset, slice )
+function goodBoxesNonDups = detect_object( image_path, offset, slice,fidelity )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 addpath(genpath(('/home/ivashish/exemplarsvm-master')));
@@ -26,7 +26,7 @@ end
 %Using default 
 esvmParams = esvm_get_default_params();
 %esvmParams.detect_add_flip =0;
-%esvmParams.detect_levels_per_octave =1;
+%esvmParams.detect_levels_per_octave =fidelity;
 fprintf(1,'Start is %d end is %d ', start, last);
 
 tt = tic;
