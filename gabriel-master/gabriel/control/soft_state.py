@@ -82,7 +82,9 @@ class Soft_State:
 
       # Is state stable
       self.state_stable = False
-      
+
+      #ESVM fidelity (10 is 100%)
+      self.fidelity =10 
       
    def displaySoftState(self):
       print "VM state list : ", self.vm_state_list
@@ -197,6 +199,26 @@ class Soft_State:
    		if self.thread_under_opt == vm_count-1 :
    			self.state_stable = True
 
+
+   def decreaseFidelity(self):
+         if self.fidelity >= 5 :
+            self.fidelity-=1
+
+   def increaseFidelity(self):
+         if self.fidelity <= 10 :
+            self.fidelity+=1
+
+
+
+   def adjustFidelity(self):
+      #calculate the expected value based on current set of odt
+      new_expected_odt =self.calculateExpectedODT();
+
+      if new_expected_odt > 500 :
+         self.decreaseFidelity()
+      else :
+         self.increaseFidelity()
+
    	
 
    def triggerScheduleCalculation(self):
@@ -230,6 +252,8 @@ class Soft_State:
 	   			if len(self.countdown) == len(self.vm_state_list) :
 	   				if (self.state_stable == False) and (len(self.vm_state_list) >1 ):
 	   					self.triggerScheduleCalculation()
+                  else :
+                     self.adjustFidelity()
    			
 
    def getSchedule(self,vm_name,frame_id) :
