@@ -26,7 +26,7 @@ end
 %Using default 
 esvmParams = esvm_get_default_params();
 %esvmParams.detect_add_flip =0;
-%esvmParams.detect_levels_per_octave =fidelity;
+esvmParams.detect_levels_per_octave =fidelity;
 fprintf(1,'Start is %d end is %d ', start, last);
 
 tt = tic;
