@@ -64,7 +64,6 @@ class DummyVideoApp(AppProxyThread):
         path_of_image = "/home/ivashish/tempImage.jpg"
         with open(path_of_image, 'wb') as file:
 	        file.write(data)
-	set
         
 	set_arg1 = "offset="+str(offset)+";"
 	set_arg2 = "slice="+str(slice_perc)+";"
@@ -74,6 +73,7 @@ class DummyVideoApp(AppProxyThread):
 	#results = mlab.run_func('detect_object_2.m',{'image_path':'/home/ivashish/tempImage.jpg','total_vm':total_vm,'vm_id':vm_id});
 	mlab.run_code(set_arg1);
 	mlab.run_code(set_arg2);
+	mlab.run_code(set_arg3);
 	results = mlab.run_code("detect_object_2('/home/ivashish/tempImage.jpg',offset,slice,fidelity)");
 	ans = mlab.get_variable('ans')
 
