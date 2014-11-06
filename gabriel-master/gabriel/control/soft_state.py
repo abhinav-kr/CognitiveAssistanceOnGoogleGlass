@@ -125,7 +125,7 @@ class Soft_State:
    			if x == self.thread_under_opt :
 
    				#getting slice_perc to the previous state
-   				k = vm_count - 1 - self.thread_under_opt
+   				k = 3* (vm_count - 1 - self.thread_under_opt)
    				slice_perc = vm_schedule.slice_perc + k
    				
    				vm_name = vm_schedule.thread_name
@@ -135,7 +135,7 @@ class Soft_State:
    				new_schedule.addVMSchedule( VM_Schedule(vm_name,offset_perc,slice_perc) )
    			elif x > self.thread_under_opt :
    				#getting slice_perc to the previous state
-   				slice_perc = vm_schedule.slice_perc - 1
+   				slice_perc = vm_schedule.slice_perc - 3
    				
    				vm_name = vm_schedule.thread_name
 
@@ -165,7 +165,7 @@ class Soft_State:
    			if x == self.thread_under_opt :
 
    				#getting slice_perc to the previous state
-   				k = vm_count - 1 - self.thread_under_opt
+   				k = 3*(vm_count - 1 - self.thread_under_opt)
    				slice_perc = vm_schedule.slice_perc - k
    				vm_name = vm_schedule.thread_name
    				#restored value
@@ -173,7 +173,7 @@ class Soft_State:
 
    			elif x > self.thread_under_opt :
    				#getting slice_perc to the previous state
-   				slice_perc = vm_schedule.slice_perc + 1   				
+   				slice_perc = vm_schedule.slice_perc + 3
    				vm_name = vm_schedule.thread_name
 
    				
@@ -205,18 +205,18 @@ class Soft_State:
    	
    	import pdb; pdb.set_trace()
    	#calculate the expected value based on current set of odt
-   	expected_odt =self.calculateExpectedODT();
+   	new_expected_odt =self.calculateExpectedODT();
    	
 
    	new_schedule =  Schedule()
    	# if new schedule did not worked
-   	if self.curr_expected_odt < expected_odt :
+   	if self.curr_expected_odt < new_expected_odt :
    		self.revertToPrevSchedule(new_schedule)
    		self.changeThreadUnderOpt()
    		self.createNewSchedule(new_schedule,self.new_schedule)
-   	else :
+   	elif self.curr_expected_odt :
    		self.createNewSchedule(new_schedule,self.curr_schedule);
-   		self.curr_expected_odt = expected_odt
+   		self.curr_expected_odt = new_expected_odt
 
    	self.new_schedule = new_schedule
 
