@@ -224,7 +224,6 @@ class Soft_State:
    	self.countdown.clear()
    	LOG.info("Calculation is triggered");
    	
-   	import pdb; pdb.set_trace()
    	#calculate the expected value based on current set of odt
    	new_expected_odt =self.calculateExpectedODT();
    	
