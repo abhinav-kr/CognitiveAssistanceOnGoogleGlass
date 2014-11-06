@@ -8,9 +8,12 @@ I = imread(image_path);
 load('voc2007-bus');
 
 models_len = length(models);
-slice_size = int32(models_len/total_vm)
 
 start = ceil( (offset*models_len)/100 )
+
+if start <1
+	start=1
+end
 
 last = floor( ((offset+slice)*models_len)/100 )
 
@@ -27,7 +30,7 @@ esvmParams = esvm_get_default_params();
 fprintf(1,'Start is %d end is %d ', start, last);
 
 tt = tic;
-rs = esvm_detect(I,models(1:50),esvmParams);
+rs = esvm_detect(I,models(start:last),esvmParams);
 bboxes = cat(1,rs.bbs{:});
 if(~isempty(bboxes))
     scores = bboxes(:,12);
