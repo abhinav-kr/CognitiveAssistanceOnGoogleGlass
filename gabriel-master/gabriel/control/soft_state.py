@@ -213,6 +213,7 @@ class Soft_State:
    def adjustFidelity(self):
       #calculate the expected value based on current set of odt
 	new_expected_odt =self.calculateExpectedODT();
+   LOG.info("Expected odt found %s" % new_expected_odt )
 	if new_expected_odt > 500 :
          self.decreaseFidelity()
 	else:
@@ -227,7 +228,6 @@ class Soft_State:
    	#calculate the expected value based on current set of odt
    	new_expected_odt =self.calculateExpectedODT();
    	
-
    	new_schedule =  Schedule()
    	# if new schedule did not worked
    	if self.curr_expected_odt < new_expected_odt :
