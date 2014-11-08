@@ -213,7 +213,7 @@ class Soft_State:
    def adjustFidelity(self):
       #calculate the expected value based on current set of odt
 	new_expected_odt =self.calculateExpectedODT();
-   LOG.info("Expected odt found %s" % new_expected_odt )
+	LOG.info("Expected odt found %s" % new_expected_odt )
 	if new_expected_odt > 500 :
          self.decreaseFidelity()
 	else:
@@ -248,13 +248,13 @@ class Soft_State:
 	   			self.countdown[thread_name]=1
 
 	   			if len(self.countdown) == len(self.vm_state_list) :
-                  LOG.info("Count down expired" )
+        		                LOG.info("Count down expired" )
 	   				if (self.state_stable == False) and (len(self.vm_state_list) >1 ):
-                     LOG.info("Triggering schedule calculation" )
+		                                LOG.info("Triggering schedule calculation" )
 	   					self.triggerScheduleCalculation()
-                 		elif self.state_stable == True:
-                        LOG.info("Adjusting fidelity" )
-		                  self.adjustFidelity()
+         	        		elif self.state_stable == True:
+	        	                  LOG.info("Adjusting fidelity" )
+		        	          self.adjustFidelity()
    			
 
    def getSchedule(self,vm_name,frame_id) :
