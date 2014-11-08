@@ -248,10 +248,13 @@ class Soft_State:
 	   			self.countdown[thread_name]=1
 
 	   			if len(self.countdown) == len(self.vm_state_list) :
+                  LOG.info("Count down expired" )
 	   				if (self.state_stable == False) and (len(self.vm_state_list) >1 ):
+                     LOG.info("Triggering schedule calculation" )
 	   					self.triggerScheduleCalculation()
                  		elif self.state_stable == True:
-		                     	self.adjustFidelity()
+                        LOG.info("Adjusting fidelity" )
+		                  self.adjustFidelity()
    			
 
    def getSchedule(self,vm_name,frame_id) :
