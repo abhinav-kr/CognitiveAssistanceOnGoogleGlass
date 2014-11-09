@@ -81,7 +81,7 @@ class Soft_State:
       self.thread_under_opt =0
 
       # Is state stable
-      self.state_stable = False
+      self.state_stable = True
 
       #ESVM fidelity (10 is 100%)
       self.fidelity =10 
@@ -201,7 +201,7 @@ class Soft_State:
 
 
    def decreaseFidelity(self):
-         if self.fidelity > 5 :
+         if self.fidelity > 3 :
             self.fidelity-=1
 
    def increaseFidelity(self):
@@ -221,12 +221,12 @@ class Soft_State:
 
    	
 
-   def triggerScheduleCalculation(self):
+   def triggerScheduleCalculation(self, new_expected_odt):
    	self.countdown.clear()
    	LOG.info("Calculation is triggered");
    	
    	#calculate the expected value based on current set of odt
-   	new_expected_odt =self.calculateExpectedODT();
+   	#inew_expected_odt =self.calculateExpectedODT();
    	
    	new_schedule =  Schedule()
    	# if new schedule did not worked
@@ -246,15 +246,17 @@ class Soft_State:
 	   		if ele.thread_name == thread_name :
 	   			ele.last_odt = odt
 	   			self.countdown[thread_name]=1
-
+				
 	   			if len(self.countdown) == len(self.vm_state_list) :
+					new_expected_odt =self.calculateExpectedODT();
+					LOG.info("Expected odt found %s" % new_expected_odt )
         		                LOG.info("Count down expired" )
 	   				if (self.state_stable == False) and (len(self.vm_state_list) >1 ):
 		                                LOG.info("Triggering schedule calculation" )
-	   					self.triggerScheduleCalculation()
+	   					self.triggerScheduleCalculation(new_expected_odt)
          	        		elif self.state_stable == True:
 	        	                  LOG.info("Adjusting fidelity" )
-		        	          self.adjustFidelity()
+		        	          #self.adjustFidelity()
    			
 
    def getSchedule(self,vm_name,frame_id) :
@@ -281,6 +283,7 @@ class Soft_State:
 
    	offset=0
    	slice_perc = 100/vm_count
+	slice_perc = 10
    	if vm_count == 1:
    		new_schedule.addVMSchedule( VM_Schedule(vm_name,0,100) )
    	else :
@@ -290,6 +293,7 @@ class Soft_State:
 	   		cur_vm_name = vm_schedule.thread_name
 			new_schedule.addVMSchedule( VM_Schedule(cur_vm_name,offset,slice_perc) )
 			offset += slice_perc
+			slice_perc =90
 
 		if slice_perc+offset <100:
 			slice_perc += 1

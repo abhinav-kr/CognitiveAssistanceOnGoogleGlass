@@ -305,13 +305,18 @@ class MobileResultHandler(MobileSensorHandler):
             # the token bucket.
 	        
 
-            #import pdb; pdb.set_trace()
+            import pdb; pdb.set_trace()
             global soft_state
             header = json.loads(result_msg)
             app_recv_time = int(round(time.time() * 1000))
             app_sent_time = header.get(Video_application.JSON_APP_SENT_TIME)
 
+
             odt = app_recv_time - app_sent_time
+
+	    vm_response = result_msg['result'];
+            odt = vm_response[len(vm_response)-1];
+
             thread_name = header[Video_application.JSON_THREAD_NAME]
             frame_id = header[Protocol_client.FRAME_MESSAGE_KEY]
 

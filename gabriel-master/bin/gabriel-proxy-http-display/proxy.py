@@ -77,28 +77,12 @@ class DummyVideoApp(AppProxyThread):
 	results = mlab.run_code("detect_object_2('/home/ivashish/tempImage.jpg',offset,slice,fidelity)");
 	ans = mlab.get_variable('ans')
 
-	#import pdb; pdb.set_trace();	
-	'''
-	session = MatlabSession(matlab_root='/home/ivashish/Matlab')
-	self.session.putvalue('x',3);
-	ans = self.session.getvalue('x');
-	'''
-	'''
-        matlab_session.putvalue('inputImagePath', path_of_image)
-	matlab_session.run('addpath(genpath(\'/home/ishan/exemplarsvm-master\'))');
-        matlab_session.run('results = detect_object(inputImagePath)')
- 	ans= matlab_session.getvalue('results')
-	'''
 	#import pdb; pdb.set_trace()       
         
-        share_queue.put_nowait(data)
 	
-        if not ans:
-		ret = '';
-	else:
-		ret = 'bus found';
+        share_queue.put_nowait(data);
 
-        return ret
+        return ans
 
 
 class MJPEGStreamHandler(BaseHTTPRequestHandler, object):
