@@ -113,7 +113,7 @@ class Soft_State:
    		expected_odt = expected_odt + ( (vm_schedule.slice_perc/100.0)* ele.last_odt)
    		index+=1
    	
-   	LOG.info("Calculation is triggered %s" % str(expected_odt));
+   	#LOG.info("Calculation is triggered %s" % str(expected_odt));
    	return expected_odt
 
 
@@ -213,7 +213,6 @@ class Soft_State:
    def adjustFidelity(self):
       #calculate the expected value based on current set of odt
 	new_expected_odt =self.calculateExpectedODT();
-	LOG.info("Expected odt found %s" % new_expected_odt )
 	if new_expected_odt > 500 :
          self.decreaseFidelity()
 	else:
@@ -223,18 +222,21 @@ class Soft_State:
 
    def triggerScheduleCalculation(self, new_expected_odt):
    	self.countdown.clear()
-   	LOG.info("Calculation is triggered");
+   	#LOG.info("Calculation is triggered");
    	
    	#calculate the expected value based on current set of odt
    	#inew_expected_odt =self.calculateExpectedODT();
    	
    	new_schedule =  Schedule()
    	# if new schedule did not worked
+      LOG.info("Measured EODT:  %s, Curr EODT: %s" % new_expected_odt % self.curr_expected_odt)
+
    	if self.curr_expected_odt < new_expected_odt :
    		self.revertToPrevSchedule(new_schedule)
    		self.changeThreadUnderOpt()
    		self.createNewSchedule(new_schedule,self.new_schedule)
    	elif self.curr_expected_odt :
+         LOG.info("Reverting back to old schedule")
    		self.createNewSchedule(new_schedule,self.curr_schedule);
    		self.curr_expected_odt = new_expected_odt
 
@@ -249,13 +251,13 @@ class Soft_State:
 				
 	   			if len(self.countdown) == len(self.vm_state_list) :
 					new_expected_odt =self.calculateExpectedODT();
-					LOG.info("Expected odt found %s" % new_expected_odt )
-        		                LOG.info("Count down expired" )
+					#LOG.info("Expected odt found %s" % new_expected_odt )
+        		                #LOG.info("Count down expired" )
 	   				if (self.state_stable == False) and (len(self.vm_state_list) >1 ):
-		                                LOG.info("Triggering schedule calculation" )
+		                                #LOG.info("Triggering schedule calculation" )
 	   					self.triggerScheduleCalculation(new_expected_odt)
          	        		elif self.state_stable == True:
-	        	                  LOG.info("Adjusting fidelity" )
+	        	                  #LOG.info("Adjusting fidelity" )
 		        	          self.adjustFidelity()
    			
 
