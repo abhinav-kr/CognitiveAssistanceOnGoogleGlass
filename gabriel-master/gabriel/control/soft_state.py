@@ -81,7 +81,7 @@ class Soft_State:
       self.thread_under_opt =0
 
       # Is state stable
-      self.state_stable = True
+      self.state_stable = False
 
       #ESVM fidelity (10 is 100%)
       self.fidelity =10 
@@ -283,7 +283,7 @@ class Soft_State:
 
    	offset=0
    	slice_perc = 100/vm_count
-	slice_perc = 10
+	#slice_perc = 10
    	if vm_count == 1:
    		new_schedule.addVMSchedule( VM_Schedule(vm_name,0,100) )
    	else :
@@ -293,7 +293,7 @@ class Soft_State:
 	   		cur_vm_name = vm_schedule.thread_name
 			new_schedule.addVMSchedule( VM_Schedule(cur_vm_name,offset,slice_perc) )
 			offset += slice_perc
-			slice_perc =90
+			#slice_perc =90
 
 		if slice_perc+offset <100:
 			slice_perc += 1

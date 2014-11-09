@@ -44,7 +44,7 @@ else
 end
 
 time_taken = toc(tt);
-goodBoxesNonDups = [goodBoxesNonDups 10 time_taken];
+goodBoxesNonDups = [goodBoxesNonDups 10 int32(time_taken*1000)];
 display(goodBoxesNonDups)
 disp(num2str(time_taken));
 end
