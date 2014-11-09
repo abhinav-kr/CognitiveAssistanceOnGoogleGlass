@@ -85,6 +85,9 @@ class Soft_State:
 
       #ESVM fidelity (10 is 100%)
       self.fidelity =10 
+
+      #Indicates how many schedules have been offered since last accepted schedule
+      self.schedule_ahead_by =1
       
    def displaySoftState(self):
       print "VM state list : ", self.vm_state_list
@@ -229,16 +232,32 @@ class Soft_State:
    	
    	new_schedule =  Schedule()
    	# if new schedule did not worked
-      LOG.info("Measured EODT:  %s, Curr EODT: %s" % new_expected_odt % self.curr_expected_odt)
+      
+      diff = self.curr_expected_odt - new_expected_odt
 
-   	if self.curr_expected_odt < new_expected_odt :
-   		self.revertToPrevSchedule(new_schedule)
+      perc_diff = 0
+
+      if diff < 0 :
+         perc_diff = (-diff)/self.curr_expected_odt
+
+      if (diff < 0) && (perc_diff < 10):
+         self.createNewSchedule(new_schedule,self.curr_schedule);
+         self.self.schedule_ahead_by+=1
+
+      LOG.info("Measured EODT:  %s, Curr EODT: %s , Diff: %s, Perc diff : %s" % new_expected_odt % self.curr_expected_odt,diff, perc_diff)
+   	if (diff < 0) && (perc_diff > 10):
+         #revert schdule back to last accepted
+         for x in xrange(1,self.schedule_ahead_by):
+            self.revertToPrevSchedule(new_schedule)
+            self.schedule_ahead_by-=1
+   		
    		self.changeThreadUnderOpt()
    		self.createNewSchedule(new_schedule,self.new_schedule)
    	elif self.curr_expected_odt :
          LOG.info("Reverting back to old schedule")
    		self.createNewSchedule(new_schedule,self.curr_schedule);
    		self.curr_expected_odt = new_expected_odt
+         self.schedule_ahead_by=1
 
    	self.new_schedule = new_schedule
 
