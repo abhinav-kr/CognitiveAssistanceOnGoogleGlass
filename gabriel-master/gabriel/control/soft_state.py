@@ -229,14 +229,14 @@ class Soft_State:
    	
    	new_schedule =  Schedule()
    	# if new schedule did not worked
-      LOG.info("Measured EODT:  %s, Curr EODT: %s" % new_expected_odt % self.curr_expected_odt)
+        LOG.info("Measured EODT:  %s, Curr EODT: %s", new_expected_odt , self.curr_expected_odt)
 
    	if self.curr_expected_odt < new_expected_odt :
    		self.revertToPrevSchedule(new_schedule)
    		self.changeThreadUnderOpt()
    		self.createNewSchedule(new_schedule,self.new_schedule)
    	elif self.curr_expected_odt :
-         LOG.info("Reverting back to old schedule")
+     	        LOG.info("Reverting back to old schedule")
    		self.createNewSchedule(new_schedule,self.curr_schedule);
    		self.curr_expected_odt = new_expected_odt
 
