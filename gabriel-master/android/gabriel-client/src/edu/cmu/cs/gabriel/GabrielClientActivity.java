@@ -10,38 +10,35 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import edu.cmu.cs.gabriel.R;
-import edu.cmu.cs.gabriel.network.AccStreamingThread;
-import edu.cmu.cs.gabriel.network.NetworkProtocol;
-import edu.cmu.cs.gabriel.network.ResultReceivingThread;
-import edu.cmu.cs.gabriel.network.VideoStreamingThread;
-import edu.cmu.cs.gabriel.token.TokenController;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.hardware.Camera;
+import android.hardware.Camera.PreviewCallback;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
+import edu.cmu.cs.gabriel.network.AccStreamingThread;
+import edu.cmu.cs.gabriel.network.NetworkProtocol;
+import edu.cmu.cs.gabriel.network.ResultReceivingThread;
+import edu.cmu.cs.gabriel.network.VideoStreamingThread;
+import edu.cmu.cs.gabriel.token.TokenController;
 
 public class GabrielClientActivity extends Activity implements TextToSpeech.OnInitListener, SensorEventListener {
 	
@@ -58,7 +55,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 	public static final int GPS_PORT = 9100;
 	public static final int RESULT_RECEIVING_PORT = 9101;
 
-	CameraConnector cameraRecorder;
+	private CameraConnector cameraRecorder;
 	
 	VideoStreamingThread videoStreamingThread;
 	AccStreamingThread accStreamingThread;
@@ -307,6 +304,8 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 			if (msg.what == NetworkProtocol.NETWORK_RET_FAILED) {
 				Bundle data = msg.getData();
 				String message = data.getString("message");
+				Log.d(LOG_TAG, "Return Failed!");
+
 //				stopStreaming();
 //				new AlertDialog.Builder(GabrielClientActivity.this).setTitle("INFO").setMessage(message)
 //						.setIcon(R.drawable.ic_launcher).setNegativeButton("Confirm", null).show();
@@ -315,10 +314,42 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 				if (mTTS != null){
 					String ttsMessage = (String) msg.obj;
 
-					// Select a random hello.
 					Log.d(LOG_TAG, "tts string origin: " + ttsMessage);
-					mTTS.setSpeechRate(1f);
-					mTTS.speak(ttsMessage, TextToSpeech.QUEUE_FLUSH, null);					
+					
+					String []splitS = ttsMessage.substring(1).split(",");
+					if(splitS.length > 3) {
+						
+						Integer xmin = Integer.parseInt(splitS[0]);
+						Integer ymin = Integer.parseInt(splitS[1]);
+						Integer xmax = Integer.parseInt(splitS[2]);
+						Integer ymax = Integer.parseInt(splitS[3]);
+						
+						Log.d("abhinav", "Recognized!! " + xmin.toString()+ymin.toString()+xmax.toString()+ymax.toString());
+						
+						
+						Display display = getWindowManager().getDefaultDisplay();
+						Point size = new Point();
+						display.getSize(size);
+						int width = size.x;
+						int height = size.y;
+//						Log.d(LOG_TAG, "ScreenSize =  "+width+"  "+height);
+						Log.d("abhinav", "CameraPicSize =  "+mPreview.supportingSize.get(0).width+"  "+mPreview.supportingSize.get(0).height);
+						
+						//Find a way to not hard-code these values.
+						double screenWidth = 320.0;
+						double screemHeight = 240.0;
+
+						Integer relXmin =(int) (((double)xmin/screenWidth)*(double)width);
+						Integer relYmin =(int) (((double)ymin/screemHeight)*(double)height);
+						Integer relXmax =(int) (((double)xmax/screenWidth)*(double)width);
+						Integer relYmax =(int) (((double)ymax/screemHeight)*(double)height);
+//						mTTS.setSpeechRate(1f);
+//						mTTS.speak("Object Found", TextToSpeech.QUEUE_FLUSH, null);	
+						mPreview.setRectangle(relXmin, relYmin, relXmax, relYmax);
+					}
+					
+					long stopTime = System.currentTimeMillis();
+					Log.d("abhinav","Time when the result is received :"+stopTime);
 				}
 			}
 		}
