@@ -232,7 +232,6 @@ class Soft_State:
    	
    	new_schedule =  Schedule()
    	# if new schedule did not worked
-      
       diff = self.curr_expected_odt - new_expected_odt
 
       perc_diff = 0
@@ -254,7 +253,7 @@ class Soft_State:
    		self.changeThreadUnderOpt()
    		self.createNewSchedule(new_schedule,self.new_schedule)
    	elif self.curr_expected_odt :
-         LOG.info("Reverting back to old schedule")
+     	        LOG.info("Reverting back to old schedule")
    		self.createNewSchedule(new_schedule,self.curr_schedule);
    		self.curr_expected_odt = new_expected_odt
          self.schedule_ahead_by=1
