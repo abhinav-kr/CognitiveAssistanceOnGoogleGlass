@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
+import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
@@ -25,6 +29,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 	public Camera mCamera = null;
 	public List<int[]> supportingFPS = null;
 	public List<Camera.Size> supportingSize = null;
+	
+	
+	private Paint paint = new Paint();
+	private int x1=0, y1=0, x2=0, y2=0;
 
 	public void close() {
 		if (mCamera != null) {
@@ -81,6 +89,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 		}
 		if (mCamera != null) {
 			try {
+				setWillNotDraw(false); 
 				mCamera.setPreviewDisplay(holder);
 				// set fps to capture
 				Camera.Parameters parameters = mCamera.getParameters();
@@ -145,6 +154,33 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
 	public Camera getCamera() {
 		return mCamera;
+	}
+	
+	/*
+	 * To set the rectangle, pass positive integer values
+	 * To remove the rectangle, set all the parameters as zeroes.
+	 */
+	public void setRectangle(int x1, int y1, int x2, int y2) {
+		this.x1 =x1;
+		this.y1 =y1;
+		this.x2 =x2;
+		this.y2 = y2;
+		this.invalidate();
+	}
+	
+	@Override
+	protected void onDraw(Canvas canvas) {
+		this.paint.setStrokeWidth(5);        
+		this.paint.setStyle(Paint.Style.STROKE); 
+		this.paint.setColor(Color.RED);
+		
+		if(this.x1==0 && this.y1==0 && this.x2==0 && this.y2==0) {
+			canvas.drawColor(0, Mode.CLEAR);
+		} else {
+			canvas.drawRect(this.x1, this.y1, this.x2, this.y2, paint);
+		}
+		
+	    Log.w(this.getClass().getName(), "On Draw Called");
 	}
 
 }
