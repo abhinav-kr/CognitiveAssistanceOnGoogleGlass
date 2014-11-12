@@ -3,11 +3,9 @@ function goodBoxesNonDups = detect_object( image_path, offset, slice,fidelity )
 %   Detailed explanation goes here
 addpath(genpath(('/home/ivashish/voc-dpm-master')));
 
-I = imread(image_path);
+im = imread(image_path);
 
-load('VOC2007/bottle_final.mat');
-
-models_len = length(models);
+load('VOC2007/car_final.mat');
 
 tt = tic;
 goodBoxesNonDups = process(im, model, -0.5);

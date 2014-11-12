@@ -335,7 +335,7 @@ class MobileResultHandler(MobileSensorHandler):
                     result_msg)
             self.request.send(packet)
             self.wfile.flush()
-            #LOG.info("result message (%s) sent to the Glass", result_msg)
+            LOG.info("result message (%s) sent to the Glass", result_msg)
 
 
         except Queue.Empty:

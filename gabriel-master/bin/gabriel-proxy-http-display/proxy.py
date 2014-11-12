@@ -60,7 +60,10 @@ class DummyVideoApp(AppProxyThread):
 	offset = header['vm_offset']; 
 	slice_perc =  header['vm_slice'];
 	fidelity =  header['cog_eng_fidelity'];
+	
+	method =  header['method'];
     
+
         path_of_image = "/home/ivashish/tempImage.jpg"
         with open(path_of_image, 'wb') as file:
 	        file.write(data)
@@ -68,13 +71,23 @@ class DummyVideoApp(AppProxyThread):
 	set_arg1 = "offset="+str(offset)+";"
 	set_arg2 = "slice="+str(slice_perc)+";"
 	set_arg3 = "fidelity="+str(fidelity)+";"
+	models_dir_cmd = "addpath('/home/ivashish/exemplarsvm-master')"
+	
+	if method == "dpm": 
+		models_dir_cmd = "addpath('/home/ivashish/voc-dpm-master')"
 
-	mlab.run_code("addpath('/home/ivashish/exemplarsvm-master')")
+	mlab.run_code(models_dir_cmd)
 	#results = mlab.run_func('detect_object_2.m',{'image_path':'/home/ivashish/tempImage.jpg','total_vm':total_vm,'vm_id':vm_id});
 	mlab.run_code(set_arg1);
 	mlab.run_code(set_arg2);
 	mlab.run_code(set_arg3);
-	results = mlab.run_code("detect_object_2('/home/ivashish/tempImage.jpg',offset,slice,fidelity)");
+
+
+	if method == "dpm":
+		results = mlab.run_code("dpm_detect('/home/ivashish/tempImage.jpg',offset,slice,fidelity)");
+	else: 
+		results = mlab.run_code("detect_object_2('/home/ivashish/tempImage.jpg',offset,slice,fidelity)");
+	
 	ans = mlab.get_variable('ans')
 
 	#import pdb; pdb.set_trace()       

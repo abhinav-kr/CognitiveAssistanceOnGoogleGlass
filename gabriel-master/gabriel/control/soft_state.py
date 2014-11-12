@@ -47,8 +47,12 @@ class Schedule:
 		self.vm_schedule_list.append(vm_schedule)
 
 
+	def printSchedule(self):
+		message = "( "
+		for ele in self.vm_schedule_list :
+			message = message + str(ele.slice_perc)+ " "
 
-
+		return message;
 class Soft_State:
 
    def __init__(self):
@@ -76,6 +80,7 @@ class Soft_State:
       #schedules
       self.new_schedule = None
       self.curr_schedule = None
+      self.accepted_odt = 9999999
       
       #current vm under going optimization
       self.thread_under_opt =0
@@ -130,7 +135,7 @@ class Soft_State:
    			if x == self.thread_under_opt :
 
    				#getting slice_perc to the previous state
-   				k = 4* (vm_count - 1 - self.thread_under_opt)
+   				k = (4*self.schedule_ahead_by)*(vm_count - 1 - self.thread_under_opt)
    				slice_perc = vm_schedule.slice_perc + k
    				
    				vm_name = vm_schedule.thread_name
@@ -140,11 +145,11 @@ class Soft_State:
    				new_schedule.addVMSchedule( VM_Schedule(vm_name,offset_perc,slice_perc) )
    			elif x > self.thread_under_opt :
    				#getting slice_perc to the previous state
-   				slice_perc = vm_schedule.slice_perc - 4
+   				slice_perc = vm_schedule.slice_perc - ((4)*self.schedule_ahead_by)
    				
    				vm_name = vm_schedule.thread_name
 
-   				s = 4 *(vm_count - ( x- self.thread_under_opt))
+   				s = (4*self.schedule_ahead_by)*(vm_count - ( x- self.thread_under_opt))
    				offset_perc = vm_schedule.offset_perc +s
    				
    				#restored value
@@ -232,31 +237,33 @@ class Soft_State:
    	
    	new_schedule =  Schedule()
    	# if new schedule did not worked
-      diff = self.curr_expected_odt - new_expected_odt
+        diff = self.accepted_odt - new_expected_odt
 
-      perc_diff = 0
+        perc_diff = 0
 
-      if diff < 0 :
-         perc_diff = (-diff)/self.curr_expected_odt
+        if diff < 0 :
+         perc_diff = ((-diff)/self.accepted_odt)*100
+	
 
-      if (diff < 0) && (perc_diff < 10):
-         self.createNewSchedule(new_schedule,self.curr_schedule);
-         self.self.schedule_ahead_by+=1
+	LOG.info("Measured EODT:  %s, accepted EODT: %s , Diff: %s, Perc diff : %s",new_expected_odt, self.accepted_odt,diff, perc_diff)
+        if (diff < 0) and (perc_diff < 10):
+		 LOG.info("Not sure, Trying a different one accepted one  %s", self.accepted_odt)
+	      	 self.createNewSchedule(new_schedule,self.curr_schedule);
+        	 self.schedule_ahead_by+=1
 
-      LOG.info("Measured EODT:  %s, Curr EODT: %s , Diff: %s, Perc diff : %s" % new_expected_odt % self.curr_expected_odt,diff, perc_diff)
-   	if (diff < 0) && (perc_diff > 10):
-         #revert schdule back to last accepted
-         for x in xrange(1,self.schedule_ahead_by):
-            self.revertToPrevSchedule(new_schedule)
-            self.schedule_ahead_by-=1
-   		
-   		self.changeThreadUnderOpt()
-   		self.createNewSchedule(new_schedule,self.new_schedule)
-   	elif self.curr_expected_odt :
-     	        LOG.info("Reverting back to old schedule")
+   	elif (diff < 0) and (perc_diff > 10):
+        	 #revert schdule back to last accepted
+		 LOG.info("Reverting back to old schedule");
+        	 self.revertToPrevSchedule(new_schedule)
+	         self.schedule_ahead_by=1
+   		 LOG.info("Reverted Schedule : " + new_schedule.printSchedule())	
+   		 self.changeThreadUnderOpt()
+   	else :
+		self.accepted_odt = new_expected_odt
+		LOG.info("Accepted Schedule : " + self.curr_schedule.printSchedule())
    		self.createNewSchedule(new_schedule,self.curr_schedule);
    		self.curr_expected_odt = new_expected_odt
-         self.schedule_ahead_by=1
+         	self.schedule_ahead_by=1
 
    	self.new_schedule = new_schedule
 
@@ -269,13 +276,15 @@ class Soft_State:
 				
 	   			if len(self.countdown) == len(self.vm_state_list) :
 					new_expected_odt =self.calculateExpectedODT();
-					#LOG.info("Expected odt found %s" % new_expected_odt )
+					#if self.state_stable == True :
+					LOG.info("Expected odt found %s" % new_expected_odt )
         		                #LOG.info("Count down expired" )
 	   				if (self.state_stable == False) and (len(self.vm_state_list) >1 ):
 		                                #LOG.info("Triggering schedule calculation" )
 	   					self.triggerScheduleCalculation(new_expected_odt)
-         	        		elif self.state_stable == True:
-	        	                  #LOG.info("Adjusting fidelity" )
+         	        		elif (self.state_stable == True) or (len(self.vm_state_list) == 1):
+	        	                  LOG.info("Adjusting fidelity" )
+					
 		        	          self.adjustFidelity()
    			
 
