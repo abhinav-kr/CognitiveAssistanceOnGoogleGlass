@@ -45,6 +45,7 @@ image_queue_list = list()
 acc_queue_list = list()
 gps_queue_list = list()
 result_queue = multiprocessing.Queue()
+frames_map = dict();
 
 
 class MobileCommError(Exception):
@@ -307,6 +308,7 @@ class MobileResultHandler(MobileSensorHandler):
 
             #import pdb; pdb.set_trace()
             global soft_state
+            global frames_map
             header = json.loads(result_msg)
             app_recv_time = int(round(time.time() * 1000))
             app_sent_time = header.get(Video_application.JSON_APP_SENT_TIME)
@@ -314,11 +316,50 @@ class MobileResultHandler(MobileSensorHandler):
 
             #odt = app_recv_time - app_sent_time
 
-	    vm_response = header['result'];
+	        vm_response = header['result'];
+
+
+
+
+
             odt = vm_response[len(vm_response)-1];
 
             thread_name = header[Video_application.JSON_THREAD_NAME]
             frame_id = header[Protocol_client.FRAME_MESSAGE_KEY]
+
+            vm_count = len(soft_state.vm_state_list)
+
+            sent_count  = frames_map.get(frame_id)
+            to_send = False
+            if  sent_count == None:
+                # negative response
+                if len(vm_response) <3:
+                    frames_map.put(vm_response, 1)
+                else :
+                    frames_map.put(vm_response, -1)
+            else :
+                #all negative till now
+                if sent_count > 0
+                    if len(vm_response) <3:
+                        frames_map.put(vm_response, sent_count+1)
+                    else :
+                        frames_map.put(vm_response, -1*(sent_count) -1)
+                        to_send = True;
+                # got positive already
+                else
+                    frames_map.put(vm_response, sent_count-1)
+
+
+            if vm_count == sent_count:
+                frames_map.remove(frame_id)
+                to_send = True;
+
+            if vm_count == sent_count :
+                frames_map.remove(frame_id)
+                
+
+
+
 
             soft_state.updateODT(thread_name,frame_id,odt)
 
@@ -333,9 +374,12 @@ class MobileResultHandler(MobileSensorHandler):
             packet = struct.pack("!I%ds" % len(result_msg),
                     len(result_msg),
                     result_msg)
-            self.request.send(packet)
-            self.wfile.flush()
-            #LOG.info("result message (%s) sent to the Glass", result_msg)
+
+
+            if to_send:
+                self.request.send(packet)
+                self.wfile.flush()
+                LOG.info("result message (%s) sent to the Glass", result_msg)
 
 
         except Queue.Empty:

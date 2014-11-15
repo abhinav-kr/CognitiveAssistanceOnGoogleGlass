@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Use the constants defined in the ContextualMenus.Command enum-->
+    <item
+        android:id="@+id/algo_item"
+        android:title="@string/start_button">
+        <menu>
+            <item
+                android:id="@+id/esvm_item"
+                android:title="@string/esvm" />
+            <item
+                android:id="@+id/dpm_item"
+                android:title="@string/dpm" />
+        </menu>
+    </item>
+</menu>
