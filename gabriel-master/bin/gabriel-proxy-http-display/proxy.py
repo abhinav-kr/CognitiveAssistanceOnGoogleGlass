@@ -25,7 +25,7 @@ import re
 import sys
 import json
 #import pymatlab
-#from pymatlab.matlab import MatlabSession
+from pymatlab.matlab import MatlabSession
 from pymatbridge import Matlab
 from os import curdir
 from os import sep
@@ -89,10 +89,10 @@ class DummyVideoApp(AppProxyThread):
 		results = mlab.run_code("detect_object_2('/home/ivashish/tempImage.jpg',offset,slice,fidelity)");
 	
 	ans = mlab.get_variable('ans')
-
+#	ans = "[10, 10, 100, 100]"
 	#import pdb; pdb.set_trace()       
         
-	
+		
         share_queue.put_nowait(data);
 
         return ans

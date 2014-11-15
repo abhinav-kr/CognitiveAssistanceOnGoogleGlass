@@ -135,7 +135,7 @@ class Soft_State:
    			if x == self.thread_under_opt :
 
    				#getting slice_perc to the previous state
-   				k = (4*self.schedule_ahead_by)*(vm_count - 1 - self.thread_under_opt)
+   				k = (2*self.schedule_ahead_by)*(vm_count - 1 - self.thread_under_opt)
    				slice_perc = vm_schedule.slice_perc + k
    				
    				vm_name = vm_schedule.thread_name
@@ -145,11 +145,11 @@ class Soft_State:
    				new_schedule.addVMSchedule( VM_Schedule(vm_name,offset_perc,slice_perc) )
    			elif x > self.thread_under_opt :
    				#getting slice_perc to the previous state
-   				slice_perc = vm_schedule.slice_perc - ((4)*self.schedule_ahead_by)
+   				slice_perc = vm_schedule.slice_perc - ((2)*self.schedule_ahead_by)
    				
    				vm_name = vm_schedule.thread_name
 
-   				s = (4*self.schedule_ahead_by)*(vm_count - ( x- self.thread_under_opt))
+   				s = (2*self.schedule_ahead_by)*(vm_count - ( x- self.thread_under_opt))
    				offset_perc = vm_schedule.offset_perc +s
    				
    				#restored value
@@ -175,7 +175,7 @@ class Soft_State:
    			if x == self.thread_under_opt :
 
    				#getting slice_perc to the previous state
-   				k = 4*(vm_count - 1 - self.thread_under_opt)
+   				k = 2*(vm_count - 1 - self.thread_under_opt)
    				slice_perc = vm_schedule.slice_perc - k
    				vm_name = vm_schedule.thread_name
    				#restored value
@@ -183,7 +183,7 @@ class Soft_State:
 
    			elif x > self.thread_under_opt :
    				#getting slice_perc to the previous state
-   				slice_perc = vm_schedule.slice_perc + 4
+   				slice_perc = vm_schedule.slice_perc + 2
    				vm_name = vm_schedule.thread_name
 
    				
@@ -210,10 +210,12 @@ class Soft_State:
 
    def decreaseFidelity(self):
          if self.fidelity > 3 :
+	    LOG.info("Decreased scaling to %s", str(self.fidelity) );
             self.fidelity-=1
 
    def increaseFidelity(self):
          if self.fidelity <= 10 :
+	    LOG.info("Increased scaling to %s", str(self.fidelity) );
             self.fidelity+=1
 
 
@@ -283,8 +285,6 @@ class Soft_State:
 		                                #LOG.info("Triggering schedule calculation" )
 	   					self.triggerScheduleCalculation(new_expected_odt)
          	        		elif (self.state_stable == True) or (len(self.vm_state_list) == 1):
-	        	                  LOG.info("Adjusting fidelity" )
-					
 		        	          self.adjustFidelity()
    			
 

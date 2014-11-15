@@ -148,7 +148,7 @@ class VideoSensorHandler(SensorHandler):
 	
 	    header.update({
                 'method':
-                        'dpm',
+                        'esvm',
                 })            
             header.update({
                 Video_application.JSON_VM_SLICE:
