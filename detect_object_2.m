@@ -5,7 +5,8 @@ addpath(genpath(('/home/ivashish/exemplarsvm-master')));
 
 I = imread(image_path);
 
-load('voc2007-bus');
+models = load('ketchup-final');
+models = models.combineModels;
 
 models_len = length(models);
 

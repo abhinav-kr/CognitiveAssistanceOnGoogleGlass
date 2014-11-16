@@ -89,7 +89,7 @@ class Soft_State:
       self.state_stable = False
 
       #ESVM fidelity (10 is 100%)
-      self.fidelity =3 
+      self.fidelity =6 
 
       #Indicates how many schedules have been offered since last accepted schedule
       self.schedule_ahead_by =1

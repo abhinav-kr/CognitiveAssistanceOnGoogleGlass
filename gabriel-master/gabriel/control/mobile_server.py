@@ -340,7 +340,10 @@ class MobileResultHandler(MobileSensorHandler):
             vm_count = len(soft_state.vm_state_list)
 
             sent_count  = frames_map.get(str(frame_id))
-            to_send = False
+	    if vm_count <2:
+		to_send = True;
+	    else:
+            	to_send = False;
             if  sent_count == None:
                 # negative response
                 if len(vm_response) <3:
