@@ -89,7 +89,7 @@ class Soft_State:
       self.state_stable = False
 
       #ESVM fidelity (10 is 100%)
-      self.fidelity =10 
+      self.fidelity =6 
 
       #Indicates how many schedules have been offered since last accepted schedule
       self.schedule_ahead_by =1
@@ -130,6 +130,8 @@ class Soft_State:
    		vm_count = len(self.vm_state_list)
 
    		#loop over prev state and restore prev state
+		offset = 0
+                slice_perc =0
    		for x in xrange(0,vm_count):
    			vm_schedule = self.curr_schedule.getScheduleForId(x);
    			if x == self.thread_under_opt :
@@ -139,29 +141,24 @@ class Soft_State:
    				slice_perc = vm_schedule.slice_perc + k
    				
    				vm_name = vm_schedule.thread_name
-   				offset_perc = vm_schedule.offset_perc
    				
    				#restored value
-   				new_schedule.addVMSchedule( VM_Schedule(vm_name,offset_perc,slice_perc) )
+   				new_schedule.addVMSchedule( VM_Schedule(vm_name,offset,slice_perc) )
    			elif x > self.thread_under_opt :
    				#getting slice_perc to the previous state
    				slice_perc = vm_schedule.slice_perc - ((2)*self.schedule_ahead_by)
-   				
    				vm_name = vm_schedule.thread_name
-
-   				s = (2*self.schedule_ahead_by)*(vm_count - ( x- self.thread_under_opt))
-   				offset_perc = vm_schedule.offset_perc +s
    				
    				#restored value
-   				new_schedule.addVMSchedule( VM_Schedule(vm_name,offset_perc,slice_perc) )
+   				new_schedule.addVMSchedule( VM_Schedule(vm_name,offset,slice_perc) )
    			else :
 
    				#getting slice_perc to the previous state
    				slice_perc = vm_schedule.slice_perc
    				vm_name = vm_schedule.thread_name
-   				offset_perc = vm_schedule.offset_perc
+   				new_schedule.addVMSchedule( VM_Schedule(vm_name,offset,slice_perc) )
 
-   				new_schedule.addVMSchedule( VM_Schedule(vm_name,offset_perc,slice_perc) )
+			offset +=slice_perc
 
 
    def createNewSchedule(self,new_schedule,curr_schedule):
@@ -210,13 +207,13 @@ class Soft_State:
 
    def decreaseFidelity(self):
          if self.fidelity > 3 :
-	    LOG.info("Decreased scaling to %s", str(self.fidelity) );
             self.fidelity-=1
+	    LOG.info("Decreased scaling to %s", str(self.fidelity) );
 
    def increaseFidelity(self):
          if self.fidelity <= 10 :
-	    LOG.info("Increased scaling to %s", str(self.fidelity) );
             self.fidelity+=1
+	    LOG.info("Increased scaling to %s", str(self.fidelity) );
 
 
 
@@ -255,10 +252,10 @@ class Soft_State:
 
    	elif (diff < 0) and (perc_diff > 10):
         	 #revert schdule back to last accepted
-		 LOG.info("Reverting back to old schedule");
+		 #LOG.info("Reverting back to old schedule");
         	 self.revertToPrevSchedule(new_schedule)
 	         self.schedule_ahead_by=1
-   		 LOG.info("Reverted Schedule : " + new_schedule.printSchedule())	
+   		 #LOG.info("Reverted Schedule : " + new_schedule.printSchedule())	
    		 self.changeThreadUnderOpt()
    	else :
 		self.accepted_odt = new_expected_odt
@@ -279,13 +276,14 @@ class Soft_State:
 	   			if len(self.countdown) == len(self.vm_state_list) :
 					new_expected_odt =self.calculateExpectedODT();
 					#if self.state_stable == True :
-					LOG.info("Expected odt found %s" % new_expected_odt )
+					#LOG.info("Expected odt found %s" % new_expected_odt )
         		                #LOG.info("Count down expired" )
 	   				if (self.state_stable == False) and (len(self.vm_state_list) >1 ):
 		                                #LOG.info("Triggering schedule calculation" )
 	   					self.triggerScheduleCalculation(new_expected_odt)
          	        		elif (self.state_stable == True) or (len(self.vm_state_list) == 1):
-		        	          self.adjustFidelity()
+		        	          #self.adjustFidelity()
+					  LOG.info('')
    			
 
    def getSchedule(self,vm_name,frame_id) :

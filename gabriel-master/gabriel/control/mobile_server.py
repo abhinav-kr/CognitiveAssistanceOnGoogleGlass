@@ -316,7 +316,7 @@ class MobileResultHandler(MobileSensorHandler):
 
             #odt = app_recv_time - app_sent_time
 
-	        vm_response = header['result'];
+	    vm_response = header['result'];
 
 
 
@@ -324,44 +324,51 @@ class MobileResultHandler(MobileSensorHandler):
 
             odt = vm_response[len(vm_response)-1];
 
+	    if len(vm_response) >2:
+		LOG.info("Positive should be sent");
+
+	    
             thread_name = header[Video_application.JSON_THREAD_NAME]
             frame_id = header[Protocol_client.FRAME_MESSAGE_KEY]
-
+	    soft_state.updateODT(thread_name,frame_id,odt)
+	   
+	     
             vm_count = len(soft_state.vm_state_list)
 
             sent_count  = frames_map.get(frame_id)
-            to_send = False
+	    #import pdb; pdb.set_trace()
+            to_send = True
             if  sent_count == None:
                 # negative response
                 if len(vm_response) <3:
-                    frames_map.put(vm_response, 1)
+		    frames_map[frame_id] = 1
                 else :
-                    frames_map.put(vm_response, -1)
+                    frames_map[frame_id] = -1
             else :
                 #all negative till now
-                if sent_count > 0
+                if sent_count > 0:
                     if len(vm_response) <3:
-                        frames_map.put(vm_response, sent_count+1)
+                        frames_map[frame_id] =sent_count+1
                     else :
-                        frames_map.put(vm_response, -1*(sent_count) -1)
+			frames_map[frame_id] = -1*(sent_count) -1
+			#LOG.info("Positive result found")
                         to_send = True;
                 # got positive already
-                else
-                    frames_map.put(vm_response, sent_count-1)
+                else:
+		    frames_map[frame_id] =sent_count-1
 
+		sent_count  = frames_map.get(frame_id)
+                if vm_count <= sent_count:
+                    del frames_map[frame_id]
+                    to_send = True;
 
-            if vm_count == sent_count:
-                frames_map.remove(frame_id)
-                to_send = True;
-
-            if vm_count == sent_count :
-                frames_map.remove(frame_id)
+                if vm_count >= -1*(sent_count) :
+                    del frames_map[frame_id]
                 
 
 
 
 
-            soft_state.updateODT(thread_name,frame_id,odt)
 
             header.update({
                 Video_application.JSON_OBJECT_DETECTION_TIME:
@@ -375,11 +382,10 @@ class MobileResultHandler(MobileSensorHandler):
                     len(result_msg),
                     result_msg)
 
-
-            if to_send:
-                self.request.send(packet)
-                self.wfile.flush()
-                LOG.info("result message (%s) sent to the Glass", result_msg)
+	    if to_send:
+	    	self.request.send(packet)
+		self.wfile.flush()
+                #LOG.info("result message (%s) sent to the Glass", result_msg)
 
 
         except Queue.Empty:
