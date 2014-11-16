@@ -5,7 +5,7 @@ addpath(genpath(('/home/ivashish/exemplarsvm-master')));
 
 I = imread(image_path);
 
-load('voc2007-bottle');
+load('voc2007-bus');
 
 models_len = length(models);
 

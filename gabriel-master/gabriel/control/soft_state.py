@@ -89,7 +89,7 @@ class Soft_State:
       self.state_stable = False
 
       #ESVM fidelity (10 is 100%)
-      self.fidelity =6 
+      self.fidelity =3 
 
       #Indicates how many schedules have been offered since last accepted schedule
       self.schedule_ahead_by =1
@@ -252,10 +252,10 @@ class Soft_State:
 
    	elif (diff < 0) and (perc_diff > 10):
         	 #revert schdule back to last accepted
-		 #LOG.info("Reverting back to old schedule");
+		 LOG.info("Reverting back to old schedule");
         	 self.revertToPrevSchedule(new_schedule)
 	         self.schedule_ahead_by=1
-   		 #LOG.info("Reverted Schedule : " + new_schedule.printSchedule())	
+   		 LOG.info("Reverted Schedule : " + new_schedule.printSchedule())	
    		 self.changeThreadUnderOpt()
    	else :
 		self.accepted_odt = new_expected_odt
@@ -276,7 +276,7 @@ class Soft_State:
 	   			if len(self.countdown) == len(self.vm_state_list) :
 					new_expected_odt =self.calculateExpectedODT();
 					#if self.state_stable == True :
-					#LOG.info("Expected odt found %s" % new_expected_odt )
+					LOG.info("Expected odt found %s" % new_expected_odt )
         		                #LOG.info("Count down expired" )
 	   				if (self.state_stable == False) and (len(self.vm_state_list) >1 ):
 		                                #LOG.info("Triggering schedule calculation" )

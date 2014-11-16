@@ -234,6 +234,10 @@ class MobileResultHandler(MobileSensorHandler):
         super(MobileResultHandler, self).setup()
 
         global result_queue
+	global frames_map
+
+	frames_map.clear()
+
         # flush out old result at Queue
         while result_queue.empty() is False:
             result_queue.get()
@@ -331,39 +335,40 @@ class MobileResultHandler(MobileSensorHandler):
             thread_name = header[Video_application.JSON_THREAD_NAME]
             frame_id = header[Protocol_client.FRAME_MESSAGE_KEY]
 	    soft_state.updateODT(thread_name,frame_id,odt)
-	   
-	     
+	    #import pdb; pdb.set_trace()
+		     
             vm_count = len(soft_state.vm_state_list)
 
-            sent_count  = frames_map.get(frame_id)
-	    #import pdb; pdb.set_trace()
-            to_send = True
+            sent_count  = frames_map.get(str(frame_id))
+            to_send = False
             if  sent_count == None:
                 # negative response
                 if len(vm_response) <3:
-		    frames_map[frame_id] = 1
+		    frames_map[str(frame_id)] = 1
                 else :
-                    frames_map[frame_id] = -1
+		    #import pdb; pdb.set_trace()
+                    frames_map[str(frame_id)] = -1
+		    to_send = True;
             else :
                 #all negative till now
                 if sent_count > 0:
                     if len(vm_response) <3:
-                        frames_map[frame_id] =sent_count+1
+                        frames_map[str(frame_id)] =sent_count+1
                     else :
-			frames_map[frame_id] = -1*(sent_count) -1
+			#import pdb; pdb.set_trace()
+			frames_map[str(frame_id)] = -1*(sent_count) -1
 			#LOG.info("Positive result found")
                         to_send = True;
                 # got positive already
                 else:
-		    frames_map[frame_id] =sent_count-1
+		    frames_map[str(frame_id)] =sent_count-1
 
-		sent_count  = frames_map.get(frame_id)
+		sent_count  = frames_map.get(str(frame_id))
                 if vm_count <= sent_count:
-                    del frames_map[frame_id]
+                    del frames_map[str(frame_id)]
                     to_send = True;
-
-                if vm_count >= -1*(sent_count) :
-                    del frames_map[frame_id]
+                elif vm_count >= -1*(sent_count) :
+                    del frames_map[str(frame_id)]
                 
 
 
