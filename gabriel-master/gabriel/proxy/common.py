@@ -155,6 +155,7 @@ class AppProxyStreamingClient(threading.Thread):
 
     def _handle_input_streaming(self):
         # receive data from control VM
+	#import pdb; pdb.set_trace()
         header_size = struct.unpack("!I", self._recv_all(self.sock, 4))[0]
         data_size = struct.unpack("!I", self._recv_all(self.sock, 4))[0]
         header = self._recv_all(self.sock, header_size)

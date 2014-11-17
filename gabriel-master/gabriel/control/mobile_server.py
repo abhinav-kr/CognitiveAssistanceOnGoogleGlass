@@ -262,11 +262,14 @@ class MobileResultHandler(MobileSensorHandler):
         """ No input expected.
         But blocked read will return 0 if the other side closed gracefully
         """
-        ret_data = self.request.recv(1)
-        if ret_data == None:
+	try :
+            ret_data = self.request.recv(1)
+            if ret_data == None:
+                raise MobileCommError("Cannot recv data at %s" % str(self))
+            if len(ret_data) == 0:
+                raise MobileCommError("Client side is closed gracefully at %s" % str(self))
+        except Exception as e:
             raise MobileCommError("Cannot recv data at %s" % str(self))
-        if len(ret_data) == 0:
-            raise MobileCommError("Client side is closed gracefully at %s" % str(self))
 
     def _handle_output_result(self):
         try:

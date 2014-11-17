@@ -1,12 +1,12 @@
-function goodBoxesNonDups = detect_object( image_path, offset, slice,fidelity )
+function goodBoxesNonDups = detect_object( image_path, offset, slice,fidelity,search_item,models)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 addpath(genpath(('/home/ivashish/exemplarsvm-master')));
 
 I = imread(image_path);
 
-models = load('ketchup-final');
-models = models.combineModels;
+%models = load('ketchup-final');
+%models = models.combineModels;
 
 models_len = length(models);
 
