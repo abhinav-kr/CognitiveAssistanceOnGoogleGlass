@@ -22,12 +22,11 @@ import com.google.android.glass.widget.CardScrollAdapter;
 import com.google.android.glass.widget.CardScrollView;
 
 
-public class AlgoScrollActivity extends Activity implements TextToSpeech.OnInitListener {
+public class AlgoScrollActivity extends Activity  {
 
     private List<CardBuilder> mCards;
     private CardScrollView mCardScrollView;
     private ExampleCardScrollAdapter mAdapter;
-    TextToSpeech mTTS = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +42,6 @@ public class AlgoScrollActivity extends Activity implements TextToSpeech.OnInitL
         
         setupClickListener();
         setContentView(mCardScrollView);
-		mTTS = new TextToSpeech(this, this);
     }
     
     private void setupClickListener() {
@@ -61,10 +59,9 @@ public class AlgoScrollActivity extends Activity implements TextToSpeech.OnInitL
                 	nextIntent = new Intent(AlgoScrollActivity.this, GabrielClientActivity.class);
                 	nextIntent.putExtra(Const.ALGO_FOR_DETECTION,Const.USING_DPM);
                 	nextIntent.putExtra(Const.OBJECT_TO_DETECT, Const.OBJ_ANY);
-                    mTTS.speak("Starting stream", TextToSpeech.QUEUE_FLUSH, null);
                 }
                 
-                mTTS.shutdown();
+
                 startActivity(nextIntent);
             }
         });
@@ -74,10 +71,12 @@ public class AlgoScrollActivity extends Activity implements TextToSpeech.OnInitL
     private void createCards() {
         mCards = new ArrayList<CardBuilder>();
         
-        mCards.add(new CardBuilder(this, CardBuilder.Layout.COLUMNS)
+        mCards.add(new CardBuilder(this, CardBuilder.Layout.TEXT)
+        .setFootnote(" Tap to select.")
         .setText("Use 'Exempler SVM'"));
         
-        mCards.add(new CardBuilder(this, CardBuilder.Layout.COLUMNS)
+        mCards.add(new CardBuilder(this, CardBuilder.Layout.TEXT)
+        .setFootnote(" Tap to select.")
         .setText("Use 'DPM'")
         );
     }
@@ -114,20 +113,4 @@ public class AlgoScrollActivity extends Activity implements TextToSpeech.OnInitL
         }
 
     }
-
-	@Override
-	public void onInit(int status) {
-		if (status == TextToSpeech.SUCCESS) {
-			if (mTTS == null){
-				mTTS = new TextToSpeech(this, this);
-			}
-			int result = mTTS.setLanguage(Locale.US);
-			if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-				Log.e("krha_app", "Language is not available.");
-			}
-		} else {
-			// Initialization failed.
-			Log.e("krha_app", "Could not initialize TextToSpeech.");
-		}
-	}
 }
