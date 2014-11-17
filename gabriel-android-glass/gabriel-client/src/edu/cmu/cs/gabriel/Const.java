@@ -31,11 +31,11 @@ public class Const {
 
 	
 	// Token
-	public static int MAX_TOKEN_SIZE = 1;
+	public static int MAX_TOKEN_SIZE = 2;
 	
 	// image size and frame rate
 	public static int MIN_FPS = 20;
-	public static int IMAGE_WIDTH = 320;
+	public static int IMAGE_WIDTH = 416;
 
 	// Result File
 	public static String LATENCY_FILE_NAME = "latency-" + GABRIEL_IP + "-" + MAX_TOKEN_SIZE + ".txt";

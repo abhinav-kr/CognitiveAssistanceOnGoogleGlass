@@ -144,8 +144,8 @@ public class VideoStreamingThread extends Thread {
 				// make it as a single packet
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		        DataOutputStream dos=new DataOutputStream(baos);
-				byte[] header = ("{\"id\":" + sendingFrameID +"}").getBytes();
-				//byte[] header = ("{\"id\":" + sendingFrameID + ";\"detection_algorithm\":"+"\""+this.detectionAlgorithm+"\""+";\"object\":"+"\""+this.objectToDetect+"\""+ "}").getBytes();
+				//byte[] header = ("{\"id\":" + sendingFrameID +"}").getBytes();
+				byte[] header = ("{\"id\":" + sendingFrameID + ",\"method\":"+"\""+this.detectionAlgorithm+"\""+",\"item\":"+"\""+this.objectToDetect+"\""+ "}").getBytes();
 				dos.writeInt(header.length);
 				dos.writeInt(data.length);
 				dos.write(header);

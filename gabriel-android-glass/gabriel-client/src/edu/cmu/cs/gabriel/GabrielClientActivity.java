@@ -6,7 +6,6 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,7 +25,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -40,8 +38,9 @@ import edu.cmu.cs.gabriel.network.ResultReceivingThread;
 import edu.cmu.cs.gabriel.network.VideoStreamingThread;
 import edu.cmu.cs.gabriel.token.TokenController;
 
-public class GabrielClientActivity extends Activity implements TextToSpeech.OnInitListener, SensorEventListener {
-	
+public class GabrielClientActivity extends Activity implements
+		SensorEventListener {
+
 	private static final String LOG_TAG = "krha";
 	private static final String DEBUG_TAG = "krha_debug";
 
@@ -56,7 +55,7 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 	public static final int RESULT_RECEIVING_PORT = 9101;
 
 	CameraConnector cameraRecorder;
-	
+
 	VideoStreamingThread videoStreamingThread;
 	AccStreamingThread accStreamingThread;
 	ResultReceivingThread resultThread;
@@ -71,87 +70,93 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 
 	private SensorManager mSensorManager = null;
 	private Sensor mAccelerometer = null;
-	protected TextToSpeech mTTS = null;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.d(DEBUG_TAG, "on onCreate");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gabriel_activity_main);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED+
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON+
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);		
-	
-		
+		getWindow().addFlags(
+				WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+						+ WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+						+ WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
 		// Connect to Gabriel Server if it's not experiment
-		if (Const.IS_EXPERIMENT == false){
+		if (Const.IS_EXPERIMENT == false) {
 			final Button expButton = (Button) findViewById(R.id.button_runexperiment);
 			expButton.setVisibility(View.GONE);
 			init_once();
-			init_experiement();			
+			init_experiement();
 		}
 	}
 
 	boolean experimentStarted = false;
+
 	public void startExperiment(View view) {
 		if (!experimentStarted) {
-			// scriptized experiement	
+			// scriptized experiement
 			experimentStarted = true;
 			runExperiements();
 		}
 	}
-	
-	protected void runExperiements(){
+
+	protected void runExperiements() {
 		final Timer startTimer = new Timer();
-		TimerTask autoStart = new TimerTask(){
-			String[] ipList = {"128.2.213.104"};	//"54.203.73.67" 
-//			int[] tokenSize = {1};
-			int[] tokenSize = {10000};
+		TimerTask autoStart = new TimerTask() {
+			String[] ipList = { "128.2.213.104" }; // "54.203.73.67"
+			// int[] tokenSize = {1};
+			int[] tokenSize = { 10000 };
 			int ipIndex = 0;
 			int tokenIndex = 0;
+
 			@Override
 			public void run() {
 				GabrielClientActivity.this.runOnUiThread(new Runnable() {
-		            @Override
-		            public void run() {
+					@Override
+					public void run() {
 						// end condition
-						if ((ipIndex == ipList.length) || (tokenIndex == tokenSize.length)) {
+						if ((ipIndex == ipList.length)
+								|| (tokenIndex == tokenSize.length)) {
 							Log.d(LOG_TAG, "Finish all experiemets");
 							startTimer.cancel();
-							
+
 							terminate();
-							
+
 							return;
 						}
-						
+
 						// make a new configuration
 						Const.GABRIEL_IP = ipList[ipIndex];
 						Const.MAX_TOKEN_SIZE = tokenSize[tokenIndex];
-						Const.LATENCY_FILE_NAME = "latency-" + ipIndex + "-" + Const.GABRIEL_IP + "-" + Const.MAX_TOKEN_SIZE + ".txt";
-						Const.LATENCY_FILE = new File (Const.ROOT_DIR.getAbsolutePath() +
-								File.separator + "exp" +
-								File.separator + Const.LATENCY_FILE_NAME);
+						Const.LATENCY_FILE_NAME = "latency-" + ipIndex + "-"
+								+ Const.GABRIEL_IP + "-" + Const.MAX_TOKEN_SIZE
+								+ ".txt";
+						Const.LATENCY_FILE = new File(Const.ROOT_DIR
+								.getAbsolutePath()
+								+ File.separator
+								+ "exp"
+								+ File.separator + Const.LATENCY_FILE_NAME);
 						Log.d(LOG_TAG, "Start new experiemet");
-						Log.d(LOG_TAG, "ip: " + Const.GABRIEL_IP +"\tToken: " + Const.MAX_TOKEN_SIZE);
+						Log.d(LOG_TAG, "ip: " + Const.GABRIEL_IP + "\tToken: "
+								+ Const.MAX_TOKEN_SIZE);
 
-						
 						// run the experiment
 						init_experiement();
-						
+
 						// move on the next experiment
 						tokenIndex++;
-						if (tokenIndex == tokenSize.length){
+						if (tokenIndex == tokenSize.length) {
 							tokenIndex = 0;
 							ipIndex++;
 						}
-		            }
-		        });
+					}
+				});
 			}
 		};
-		
+
 		// run 3 minutes for each experiement
 		init_once();
-		startTimer.schedule(autoStart, 1000, 10*60*1000);
+		startTimer.schedule(autoStart, 1000, 10 * 60 * 1000);
 	}
 
 	private void init_once() {
@@ -161,16 +166,17 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 		Const.ROOT_DIR.mkdirs();
 		Const.LATENCY_DIR.mkdirs();
 		// TextToSpeech.OnInitListener
-		if (mTTS == null) {
-			mTTS = new TextToSpeech(this, this);
-		}
+
 		if (mSensorManager == null) {
 			mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-			mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-			mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+			mAccelerometer = mSensorManager
+					.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+			mSensorManager.registerListener(this, mAccelerometer,
+					SensorManager.SENSOR_DELAY_NORMAL);
 		}
 		if (this.errorAlertDialog == null) {
-			this.errorAlertDialog = new AlertDialog.Builder(GabrielClientActivity.this).create();
+			this.errorAlertDialog = new AlertDialog.Builder(
+					GabrielClientActivity.this).create();
 			this.errorAlertDialog.setTitle("Error");
 			this.errorAlertDialog.setIcon(R.drawable.ic_launcher);
 		}
@@ -178,31 +184,33 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 			cameraRecorder.close();
 			cameraRecorder = null;
 		}
-		if (localOutputStream != null){
+		if (localOutputStream != null) {
 			try {
 				localOutputStream.close();
-			} catch (IOException e) {}
+			} catch (IOException e) {
+			}
 			localOutputStream = null;
 		}
-		
+
 		if (cameraRecorder == null) {
 			cameraRecorder = new CameraConnector();
 			cameraRecorder.init();
 			Log.d(LOG_TAG, "new cameraRecorder");
 		}
-		if (localOutputStream == null){
+		if (localOutputStream == null) {
 			localOutputStream = new BufferedOutputStream(new FileOutputStream(
-					cameraRecorder.getInputFileDescriptor()), LOCAL_OUTPUT_BUFF_SIZE);
+					cameraRecorder.getInputFileDescriptor()),
+					LOCAL_OUTPUT_BUFF_SIZE);
 
 			Log.d(LOG_TAG, "new localoutputStream");
 		}
 		hasStarted = true;
 	}
-	
+
 	private void init_experiement() {
 
 		Log.d(DEBUG_TAG, "on init experiment");
-		if (tokenController != null){
+		if (tokenController != null) {
 			tokenController.close();
 		}
 		if ((videoStreamingThread != null) && (videoStreamingThread.isAlive())) {
@@ -217,47 +225,34 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 			resultThread.close();
 			resultThread = null;
 		}
-		
+
 		try {
-			Thread.sleep(3*1000);
-		} catch (InterruptedException e) {}
-		
+			Thread.sleep(3 * 1000);
+		} catch (InterruptedException e) {
+		}
+
 		tokenController = new TokenController(Const.LATENCY_FILE);
-		resultThread = new ResultReceivingThread(Const.GABRIEL_IP, RESULT_RECEIVING_PORT, returnMsgHandler, tokenController);
+		resultThread = new ResultReceivingThread(Const.GABRIEL_IP,
+				RESULT_RECEIVING_PORT, returnMsgHandler, tokenController);
 		resultThread.start();
-		
+
 		Intent currIntent = getIntent();
-		
+
 		FileDescriptor fd = cameraRecorder.getOutputFileDescriptor();
-		videoStreamingThread = new VideoStreamingThread(fd,
-				Const.GABRIEL_IP, VIDEO_STREAM_PORT, returnMsgHandler, tokenController);
-		videoStreamingThread.setDetectionAlgorithm(currIntent.getStringExtra(Const.ALGO_FOR_DETECTION));
-		videoStreamingThread.setObjectToDetect(currIntent.getStringExtra(Const.OBJECT_TO_DETECT));
+		videoStreamingThread = new VideoStreamingThread(fd, Const.GABRIEL_IP,
+				VIDEO_STREAM_PORT, returnMsgHandler, tokenController);
+		videoStreamingThread.setDetectionAlgorithm(currIntent
+				.getStringExtra(Const.ALGO_FOR_DETECTION));
+		videoStreamingThread.setObjectToDetect(currIntent
+				.getStringExtra(Const.OBJECT_TO_DETECT));
 		videoStreamingThread.start();
-		
-		
-		
-		accStreamingThread = new AccStreamingThread(Const.GABRIEL_IP, ACC_STREAM_PORT, returnMsgHandler, tokenController);
+
+		accStreamingThread = new AccStreamingThread(Const.GABRIEL_IP,
+				ACC_STREAM_PORT, returnMsgHandler, tokenController);
 		accStreamingThread.start();
 
 		stopBatteryRecording();
 		startBatteryRecording();
-	}
-	
-	// Implements TextToSpeech.OnInitListener
-	public void onInit(int status) {
-		if (status == TextToSpeech.SUCCESS) {
-			if (mTTS == null){
-				mTTS = new TextToSpeech(this, this);
-			}
-			int result = mTTS.setLanguage(Locale.US);
-			if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-				Log.e("krha_app", "Language is not available.");
-			}
-		} else {
-			// Initialization failed.
-			Log.e("krha_app", "Could not initialize TextToSpeech.");
-		}
 	}
 
 	@Override
@@ -298,9 +293,9 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 		public void onPreviewFrame(byte[] frame, Camera mCamera) {
 			if (hasStarted && (localOutputStream != null)) {
 				Camera.Parameters parameters = mCamera.getParameters();
-				if (videoStreamingThread != null){
-//					Log.d(LOG_TAG, "in");
-					videoStreamingThread.push(frame, parameters);					
+				if (videoStreamingThread != null) {
+					// Log.d(LOG_TAG, "in");
+					videoStreamingThread.push(frame, parameters);
 				}
 			}
 		}
@@ -313,67 +308,78 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 				String message = data.getString("message");
 				Log.d(LOG_TAG, "Return Failed!");
 
-//				stopStreaming();
-//				new AlertDialog.Builder(GabrielClientActivity.this).setTitle("INFO").setMessage(message)
-//						.setIcon(R.drawable.ic_launcher).setNegativeButton("Confirm", null).show();
+				// stopStreaming();
+				// new
+				// AlertDialog.Builder(GabrielClientActivity.this).setTitle("INFO").setMessage(message)
+				// .setIcon(R.drawable.ic_launcher).setNegativeButton("Confirm",
+				// null).show();
 			}
 			if (msg.what == NetworkProtocol.NETWORK_RET_RESULT) {
-				if (mTTS != null){
+
+				if (mPreview != null) {
 					String ttsMessage = (String) msg.obj;
 
 					Log.d(LOG_TAG, "tts string origin: " + ttsMessage);
-					
-					String []splitS = ttsMessage.substring(1).split(",");
-					if(splitS.length > 3) {
-						
+
+					String[] splitS = ttsMessage.substring(1).split(",");
+					if (splitS.length > 3) {
+
 						Integer xmin = Integer.parseInt(splitS[0]);
 						Integer ymin = Integer.parseInt(splitS[1]);
 						Integer xmax = Integer.parseInt(splitS[2]);
 						Integer ymax = Integer.parseInt(splitS[3]);
-						
-						Log.d("abhinav", "Recognized!! " + xmin.toString()+ymin.toString()+xmax.toString()+ymax.toString());
-						
-						Display display = getWindowManager().getDefaultDisplay();
+
+						Log.d("abhinav",
+								"Recognized!! " + xmin.toString()
+										+ ymin.toString() + xmax.toString()
+										+ ymax.toString());
+
+						Display display = getWindowManager()
+								.getDefaultDisplay();
 						Point size = new Point();
 						display.getSize(size);
 						int width = size.x;
 						int height = size.y;
-//						Log.d(LOG_TAG, "ScreenSize =  "+width+"  "+height);
-//						Log.d("abhinav", "CameraPicSize =  "+mPreview.supportingSize.get(0).width+"  "+mPreview.supportingSize.get(0).height);
-						
-						//Find a way to not hard-code these values.
-						double screenWidth = 320.0;
-						double screemHeight = 240.0;
+						// Log.d(LOG_TAG, "ScreenSize =  "+width+"  "+height);
+						// Log.d("abhinav",
+						// "CameraPicSize =  "+mPreview.supportingSize.get(0).width+"  "+mPreview.supportingSize.get(0).height);
 
-						Integer relXmin =(int) (((double)xmin/screenWidth)*(double)width);
-						Integer relYmin =(int) (((double)ymin/screemHeight)*(double)height);
-						Integer relXmax =(int) (((double)xmax/screenWidth)*(double)width);
-						Integer relYmax =(int) (((double)ymax/screemHeight)*(double)height);
-//						mTTS.setSpeechRate(1f);
-						mTTS.speak(getIntent().getStringExtra(Const.OBJECT_TO_DETECT)+" Found", TextToSpeech.QUEUE_FLUSH, null);	
-						mPreview.setRectangle(relXmin, relYmin, relXmax, relYmax);
-						
-//						Handler handler = new Handler();
-//						handler.postDelayed(new Runnable(){
-//						@Override
-//						   public void run(){
-//								Log.d("abhinav", "Erasing the Ractangle after time-out.");
-//								mPreview.setRectangle(0, 0, 0, 0);
-//						   }
-//						}, 1000);
-//						
+						// Find a way to not hard-code these values.
+						double screenWidth = 416.0;
+						double screemHeight = 304.0;
+
+						Integer relXmin = (int) (((double) xmin / screenWidth) * (double) width);
+						Integer relYmin = (int) (((double) ymin / screemHeight) * (double) height);
+						Integer relXmax = (int) (((double) xmax / screenWidth) * (double) width);
+						Integer relYmax = (int) (((double) ymax / screemHeight) * (double) height);
+						// mTTS.setSpeechRate(1f);
+						// mTTS.speak(getIntent().getStringExtra(Const.OBJECT_TO_DETECT)+" Found",
+						// TextToSpeech.QUEUE_FLUSH, null);
+						mPreview.setRectangle(relXmin, relYmin, relXmax,
+								relYmax);
+
+						// Handler handler = new Handler();
+						// handler.postDelayed(new Runnable(){
+						// @Override
+						// public void run(){
+						// Log.d("abhinav",
+						// "Erasing the Ractangle after time-out.");
+						// mPreview.setRectangle(0, 0, 0, 0);
+						// }
+						// }, 1000);
+						//
 					} else {
 						Log.d("abhinav", "Didn't find anything.");
 						mPreview.setRectangle(0, 0, 0, 0);
 					}
-					
+
 					long stopTime = System.currentTimeMillis();
-					Log.d("abhinav","Time when the result is received :"+stopTime);
+					Log.d("abhinav", "Time when the result is received :"
+							+ stopTime);
 				}
 			}
 		}
 	};
-
 
 	protected int selectedRangeIndex = 0;
 
@@ -383,29 +389,35 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 		String[] rangeListString = new String[rangeList.size()];
 		for (int i = 0; i < rangeListString.length; i++) {
 			int[] targetRange = rangeList.get(i);
-			rangeListString[i] = new String(targetRange[0] + " ~" + targetRange[1]);
+			rangeListString[i] = new String(targetRange[0] + " ~"
+					+ targetRange[1]);
 		}
 
 		AlertDialog.Builder ab = new AlertDialog.Builder(this);
 		ab.setTitle("FPS Range List");
 		ab.setIcon(R.drawable.ic_launcher);
-		ab.setSingleChoiceItems(rangeListString, 0, new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int position) {
-				selectedRangeIndex = position;
-			}
-		}).setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int position) {
-				if (position >= 0) {
-					selectedRangeIndex = position;
-				}
-				int[] targetRange = rangeList.get(selectedRangeIndex);
-				mPreview.changeConfiguration(targetRange, null);
-			}
-		}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int position) {
-				return;
-			}
-		});
+		ab.setSingleChoiceItems(rangeListString, 0,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int position) {
+						selectedRangeIndex = position;
+					}
+				})
+				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int position) {
+						if (position >= 0) {
+							selectedRangeIndex = position;
+						}
+						int[] targetRange = rangeList.get(selectedRangeIndex);
+						mPreview.changeConfiguration(targetRange, null);
+					}
+				})
+				.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int position) {
+								return;
+							}
+						});
 		ab.show();
 	}
 
@@ -417,29 +429,36 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 		String[] sizeListString = new String[imageSize.size()];
 		for (int i = 0; i < sizeListString.length; i++) {
 			Camera.Size targetRange = imageSize.get(i);
-			sizeListString[i] = new String(targetRange.width + " ~" + targetRange.height);
+			sizeListString[i] = new String(targetRange.width + " ~"
+					+ targetRange.height);
 		}
 
 		AlertDialog.Builder ab = new AlertDialog.Builder(this);
 		ab.setTitle("Image Size List");
 		ab.setIcon(R.drawable.ic_launcher);
-		ab.setSingleChoiceItems(sizeListString, 0, new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int position) {
-				selectedRangeIndex = position;
-			}
-		}).setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int position) {
-				if (position >= 0) {
-					selectedRangeIndex = position;
-				}
-				Camera.Size targetSize = imageSize.get(selectedRangeIndex);
-				mPreview.changeConfiguration(null, targetSize);
-			}
-		}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int position) {
-				return;
-			}
-		});
+		ab.setSingleChoiceItems(sizeListString, 0,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int position) {
+						selectedRangeIndex = position;
+					}
+				})
+				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int position) {
+						if (position >= 0) {
+							selectedRangeIndex = position;
+						}
+						Camera.Size targetSize = imageSize
+								.get(selectedRangeIndex);
+						mPreview.changeConfiguration(null, targetSize);
+					}
+				})
+				.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int position) {
+								return;
+							}
+						});
 		ab.show();
 	}
 
@@ -465,7 +484,8 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 
 		sharedPref.edit().putBoolean(SettingsActivity.KEY_PROXY_ENABLED, true);
 		sharedPref.edit().putString(SettingsActivity.KEY_PROTOCOL_LIST, "UDP");
-		sharedPref.edit().putString(SettingsActivity.KEY_PROXY_IP, "128.2.213.25");
+		sharedPref.edit().putString(SettingsActivity.KEY_PROXY_IP,
+				"128.2.213.25");
 		sharedPref.edit().putInt(SettingsActivity.KEY_PROXY_PORT, 8080);
 		sharedPref.edit().commit();
 
@@ -473,8 +493,10 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 
 	public void getPreferences() {
 		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-		String sProtocol = sharedPref.getString(SettingsActivity.KEY_PROTOCOL_LIST, "UDP");
-		String[] sProtocolList = getResources().getStringArray(R.array.protocol_list);
+		String sProtocol = sharedPref.getString(
+				SettingsActivity.KEY_PROTOCOL_LIST, "UDP");
+		String[] sProtocolList = getResources().getStringArray(
+				R.array.protocol_list);
 	}
 
 	/*
@@ -485,10 +507,12 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 
 	public void startBatteryRecording() {
 		BatteryRecordingService.AppName = "Gabriel" + File.separator + "exp";
-		BatteryRecordingService.setOutputFileNames("Battery-" + Const.LATENCY_FILE.getName(), 
+		BatteryRecordingService.setOutputFileNames("Battery-"
+				+ Const.LATENCY_FILE.getName(),
 				"CPU-" + Const.LATENCY_FILE.getName());
 		Log.i("wenluh", "Starting Battery Recording Service");
-		batteryRecordingService = new Intent(this, BatteryRecordingService.class);
+		batteryRecordingService = new Intent(this,
+				BatteryRecordingService.class);
 		startService(batteryRecordingService);
 	}
 
@@ -499,12 +523,12 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 			batteryRecordingService = null;
 		}
 	}
-	
+
 	private void terminate() {
 		Log.d(DEBUG_TAG, "on terminate");
 		// change only soft state
 		stopBatteryRecording();
-		
+
 		if (cameraRecorder != null) {
 			cameraRecorder.close();
 			cameraRecorder = null;
@@ -521,18 +545,11 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 			accStreamingThread.stopStreaming();
 			accStreamingThread = null;
 		}
-		if (tokenController != null){
+		if (tokenController != null) {
 			tokenController.close();
 			tokenController = null;
 		}
-		
-		// Don't forget to shutdown!
-		if (mTTS != null) {
-			Log.d(LOG_TAG, "TTS is closed");
-			mTTS.stop();
-			mTTS.shutdown();
-			mTTS = null;
-		}
+
 		if (mPreview != null) {
 			mPreview.setPreviewCallback(null);
 			mPreview.close();
@@ -554,8 +571,15 @@ public class GabrielClientActivity extends Activity implements TextToSpeech.OnIn
 		if (event.sensor.getType() != Sensor.TYPE_ACCELEROMETER)
 			return;
 		if (accStreamingThread != null) {
-//			accStreamingThread.push(event.values);
+			// accStreamingThread.push(event.values);
 		}
 		// Log.d(LOG_TAG, "acc_x : " + mSensorX + "\tacc_y : " + mSensorY);
+	}
+
+	@Override
+	public void onBackPressed() {
+		terminate();
+		GabrielClientActivity.this.finish();
+		super.onBackPressed();
 	}
 }
