@@ -3,6 +3,7 @@
 # Cloudlet Infrastructure for Mobile Computing
 #
 #   Author: Kiryong Ha <krha@cmu.edu>
+#   Author: Ishan Vashishtha<ivashish@andrew.cmu.edu>
 #
 #   Copyright (C) 2011-2013 Carnegie Mellon University
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,9 +45,10 @@ from gabriel.proxy.common import AppProxyThread
 from gabriel.proxy.common import ResultpublishClient
 from gabriel.proxy.common import get_service_list
 from gabriel.common.config import ServiceMeta as SERVICE_META
-
+from gabriel.common import log as logging
 
 share_queue = Queue.Queue();
+LOG = logging.getLogger(__name__)
 
 
 class DummyVideoApp(AppProxyThread):
@@ -62,6 +64,14 @@ class DummyVideoApp(AppProxyThread):
 	fidelity =  header['cog_eng_fidelity'];
 	
 	method =  header['method'];
+	#import pdb;pdb.set_trace()
+	search_item = header['item'];
+
+	models_to_pass = 'bus_models'
+	if search_item == 'cup':
+	   models_to_pass = 'ketchup_models'
+		
+
     
 
         path_of_image = "/home/ivashish/tempImage.jpg"
@@ -71,6 +81,7 @@ class DummyVideoApp(AppProxyThread):
 	set_arg1 = "offset="+str(offset)+";"
 	set_arg2 = "slice="+str(slice_perc)+";"
 	set_arg3 = "fidelity="+str(fidelity)+";"
+	set_arg4 = "search_item='"+str(search_item)+"';"
 	models_dir_cmd = "addpath('/home/ivashish/exemplarsvm-master')"
 	
 	if method == "dpm": 
@@ -81,12 +92,15 @@ class DummyVideoApp(AppProxyThread):
 	mlab.run_code(set_arg1);
 	mlab.run_code(set_arg2);
 	mlab.run_code(set_arg3);
+	mlab.run_code(set_arg4);
+
 
 
 	if method == "dpm":
-		results = mlab.run_code("dpm_detect('/home/ivashish/tempImage.jpg',offset,slice,fidelity)");
+		results = mlab.run_code("dpm_detect('/home/ivashish/tempImage.jpg',offset,slice,fidelity,dpm_model)");
 	else: 
-		results = mlab.run_code("detect_object_2('/home/ivashish/tempImage.jpg',offset,slice,fidelity)");
+		results = mlab.run_code("detect_object_2('/home/ivashish/tempImage.jpg',offset,slice,fidelity,search_item,"+str(models_to_pass)+");");
+
 	
 	ans = mlab.get_variable('ans')
 #	ans = "[10, 10, 100, 100]"
@@ -174,6 +188,14 @@ if __name__ == "__main__":
     #session = pymatlab.session_factory();
     mlab = Matlab('/home/ivashish/Matlab/bin/matlab');
     mlab.start();
+    mlab.run_code("tempModels = load('/home/ivashish/exemplarsvm-master/ketchup-final');");
+    mlab.run_code("ketchup_models = tempModels.combineModels");
+
+    mlab.run_code("tempModels = load('/home/ivashish/voc-dpm-master/VOC2007/car_final.mat');");
+    mlab.run_code("dpm_model = tempModels.model");
+
+    
+    LOG.info("loaded models");
 
     # dummy video app
     image_queue = Queue.Queue(1)

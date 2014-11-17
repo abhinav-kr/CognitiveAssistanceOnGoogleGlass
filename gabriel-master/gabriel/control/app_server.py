@@ -146,10 +146,6 @@ class VideoSensorHandler(SensorHandler):
             #getting current time in ms
             millis = int(round(time.time() * 1000))
 	
-	    header.update({
-                'method':
-                        'esvm',
-                })            
             header.update({
                 Video_application.JSON_VM_SLICE:
                         vm_schedule.slice_perc,
