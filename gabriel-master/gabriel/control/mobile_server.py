@@ -264,6 +264,7 @@ class MobileResultHandler(MobileSensorHandler):
         """
 	try :
             ret_data = self.request.recv(1)
+	    import pdb; pdb.set_trace()
             if ret_data == None:
                 raise MobileCommError("Cannot recv data at %s" % str(self))
             if len(ret_data) == 0:
@@ -347,34 +348,35 @@ class MobileResultHandler(MobileSensorHandler):
 		to_send = True;
 	    else:
             	to_send = False;
-            if  sent_count == None:
-                # negative response
-                if len(vm_response) <3:
-		    frames_map[str(frame_id)] = 1
-                else :
-		    #import pdb; pdb.set_trace()
-                    frames_map[str(frame_id)] = -1
-		    to_send = True;
-            else :
-                #all negative till now
-                if sent_count > 0:
-                    if len(vm_response) <3:
-                        frames_map[str(frame_id)] =sent_count+1
-                    else :
-			#import pdb; pdb.set_trace()
-			frames_map[str(frame_id)] = -1*(sent_count) -1
-			#LOG.info("Positive result found")
-                        to_send = True;
-                # got positive already
-                else:
-		    frames_map[str(frame_id)] =sent_count-1
 
-		sent_count  = frames_map.get(str(frame_id))
-                if vm_count <= sent_count:
-                    del frames_map[str(frame_id)]
-                    to_send = True;
-                elif vm_count >= -1*(sent_count) :
-                    del frames_map[str(frame_id)]
+       	    if  sent_count == None:
+	                # negative response
+	               	    if len(vm_response) <3:
+			   	 frames_map[str(frame_id)] = 1
+                	    else :
+ 				    #import pdb; pdb.set_trace()
+	        	            frames_map[str(frame_id)] = -1
+				    to_send = True;
+            else :
+        	        #all negative till now
+                	if sent_count > 0:
+                	    if len(vm_response) <3:
+    	                	    frames_map[str(frame_id)] =sent_count+1
+	       	            else :
+				#import pdb; pdb.set_trace()
+				frames_map[str(frame_id)] = -1*(sent_count) -1
+				#LOG.info("Positive result found")
+        	               	to_send = True;
+        	       		# got positive already
+		        else:
+			    frames_map[str(frame_id)] =sent_count-1
+
+			sent_count  = frames_map.get(str(frame_id))
+                	if vm_count <= sent_count:
+	                    del frames_map[str(frame_id)]
+               		    to_send = True;
+		        elif vm_count >= -1*(sent_count) :
+               		    del frames_map[str(frame_id)]
                 
 
 
