@@ -57,6 +57,7 @@ class DummyVideoApp(AppProxyThread):
 	self.mlab = mlab
 
     def handle(self, header, data,):
+	LOG.info("Recieved Frame")
 	global share_queue
 	global session
 	offset = header['vm_offset']; 
@@ -67,9 +68,9 @@ class DummyVideoApp(AppProxyThread):
 	#import pdb;pdb.set_trace()
 	search_item = header['item'];
 
-	models_to_pass = 'bus_models'
+	models_to_pass = 'ketchup_models'
 	if search_item == 'cup':
-	   models_to_pass = 'ketchup_models'
+	   models_to_pass = 'cup_models'
 		
 
     
@@ -188,8 +189,11 @@ if __name__ == "__main__":
     #session = pymatlab.session_factory();
     mlab = Matlab('/home/ivashish/Matlab/bin/matlab');
     mlab.start();
-    mlab.run_code("tempModels = load('/home/ivashish/exemplarsvm-master/ketchup-final');");
+    mlab.run_code("tempModels = load('/home/ivashish/exemplarsvm-master/ketchups-final');");
     mlab.run_code("ketchup_models = tempModels.combineModels");
+
+    mlab.run_code("tempModels = load('/home/ivashish/exemplarsvm-master/cup_comb.mat');");
+    mlab.run_code("cup_models = tempModels.allEsvms");
 
     mlab.run_code("tempModels = load('/home/ivashish/voc-dpm-master/VOC2007/car_final.mat');");
     mlab.run_code("dpm_model = tempModels.model");

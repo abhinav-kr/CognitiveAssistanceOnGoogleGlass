@@ -136,6 +136,7 @@ class MobileVideoHandler(MobileSensorHandler):
 
     def _handle_input_data(self):
         #import pdb; pdb.set_trace();
+	LOG.info("Recieved Frame")
         header_size = struct.unpack("!I", self._recv_all(4))[0]
         img_size = struct.unpack("!I", self._recv_all(4))[0]
         header_data = self._recv_all(header_size)
@@ -262,15 +263,15 @@ class MobileResultHandler(MobileSensorHandler):
         """ No input expected.
         But blocked read will return 0 if the other side closed gracefully
         """
-	try :
-            ret_data = self.request.recv(1)
-	    import pdb; pdb.set_trace()
-            if ret_data == None:
+	#try :
+        ret_data = self.request.recv(1)
+	#import pdb; pdb.set_trace()
+        if ret_data == None:
                 raise MobileCommError("Cannot recv data at %s" % str(self))
-            if len(ret_data) == 0:
+        if len(ret_data) == 0:
                 raise MobileCommError("Client side is closed gracefully at %s" % str(self))
-        except Exception as e:
-            raise MobileCommError("Cannot recv data at %s" % str(self))
+        #except Exception as e:
+        #raise MobileCommError("ERROR Cannot recv data at %s" % str(self))
 
     def _handle_output_result(self):
         try:
@@ -348,8 +349,7 @@ class MobileResultHandler(MobileSensorHandler):
 		to_send = True;
 	    else:
             	to_send = False;
-
-       	    if  sent_count == None:
+       	   	if  sent_count == None:
 	                # negative response
 	               	    if len(vm_response) <3:
 			   	 frames_map[str(frame_id)] = 1
@@ -357,7 +357,7 @@ class MobileResultHandler(MobileSensorHandler):
  				    #import pdb; pdb.set_trace()
 	        	            frames_map[str(frame_id)] = -1
 				    to_send = True;
-            else :
+                else :
         	        #all negative till now
                 	if sent_count > 0:
                 	    if len(vm_response) <3:
@@ -371,12 +371,13 @@ class MobileResultHandler(MobileSensorHandler):
 		        else:
 			    frames_map[str(frame_id)] =sent_count-1
 
-			sent_count  = frames_map.get(str(frame_id))
-                	if vm_count <= sent_count:
-	                    del frames_map[str(frame_id)]
-               		    to_send = True;
-		        elif vm_count >= -1*(sent_count) :
-               		    del frames_map[str(frame_id)]
+		sent_count  = frames_map.get(str(frame_id))
+
+                if vm_count <= sent_count:
+	                del frames_map[str(frame_id)]
+               		to_send = True
+		elif sent_count < 0 and vm_count <= -1*(sent_count) :
+               		del frames_map[str(frame_id)]
                 
 
 
@@ -394,11 +395,11 @@ class MobileResultHandler(MobileSensorHandler):
             packet = struct.pack("!I%ds" % len(result_msg),
                     len(result_msg),
                     result_msg)
-
+	    LOG.info("to send is %s for frame %s", str(to_send),str(frame_id))
 	    if to_send:
 	    	self.request.send(packet)
 		self.wfile.flush()
-                #LOG.info("result message (%s) sent to the Glass", result_msg)
+                LOG.info("result message (%s) sent to the Glass", result_msg)
 
 
         except Queue.Empty:
