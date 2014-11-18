@@ -195,7 +195,7 @@ if __name__ == "__main__":
     mlab.run_code("tempModels = load('/home/ivashish/exemplarsvm-master/cup_comb.mat');");
     mlab.run_code("cup_models = tempModels.allEsvms");
 
-    mlab.run_code("tempModels = load('/home/ivashish/voc-dpm-master/VOC2007/car_final.mat');");
+    mlab.run_code("tempModels = load('/home/ivashish/voc-dpm-master/VOC2007/bottle_final.mat');");
     mlab.run_code("dpm_model = tempModels.model");
 
     
